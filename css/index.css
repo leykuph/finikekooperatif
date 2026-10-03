@@ -45,50 +45,11 @@
 @media (max-width:820px){.geo{grid-template-columns:1fr}}
 .geo .ph{aspect-ratio:4/3}
 /* tek başına duran .ph'leri baskı gibi çerçevele */
-.geo .ph,.story .ph,.featured > div > .ph,.product .ph{border:10px solid var(--paper);border-bottom-width:14px;box-shadow:var(--shadow);border-radius:0}
+.geo .ph,.story .ph{border:10px solid var(--paper);border-bottom-width:14px;box-shadow:var(--shadow);border-radius:0}
 .geo .ph{rotate:-1.5deg}
 .checklist{list-style:none;padding:0;margin:0;display:grid;gap:12px}
 .checklist li{display:grid;grid-template-columns:26px 1fr;gap:10px}
 .checklist li::before{content:"✓";font-family:var(--font-hand);font-size:1.6rem;line-height:1;color:var(--orange);rotate:-8deg}
-
-/* ---------- Ürünler: fotoğraf + elle yazılmış fiyat ---------- */
-#product-grid{row-gap:56px;column-gap:32px}
-.product{display:grid;gap:8px;align-content:start;min-width:0;grid-template-rows:auto auto auto 1fr auto}
-.product .ph{aspect-ratio:4/3;margin-bottom:10px;rotate:-1deg}
-.product:nth-child(2n) .ph{rotate:1.2deg}
-.product:nth-child(3n) .ph{rotate:-.4deg}
-.product h3{font-size:1.35rem}
-.product-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:auto;padding-top:12px;border-top:1.5px dashed var(--line)}
-.price{font-family:var(--font-hand);font-weight:700;font-size:2.1rem;line-height:1;color:var(--orange-ink);font-variant-numeric:tabular-nums}
-.price small{font-family:var(--font-body);font-size:.42em;margin-left:4px;color:var(--muted);font-weight:500}
-
-/* ---------- Öne çıkan ürün / sipariş ---------- */
-.featured{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,5vw,72px)}
-@media (max-width:880px){.featured{grid-template-columns:1fr}}
-.featured > div > .ph{aspect-ratio:1;min-height:0;rotate:1deg}
-.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
-.thumbs .ph{aspect-ratio:1;border:6px solid var(--paper);box-shadow:var(--shadow);border-radius:0}
-.thumbs .ph:nth-child(1){rotate:-3deg}.thumbs .ph:nth-child(2){rotate:2deg}.thumbs .ph:nth-child(3){rotate:-1deg}
-.featured form{background:var(--surface);padding:clamp(20px,3vw,36px);border-radius:var(--radius-sm);box-shadow:0 6px 14px -8px rgba(60,40,15,.3)}
-fieldset{border:0;padding:0;margin:0;display:grid;gap:10px;min-width:0}
-legend{font-weight:700;font-size:var(--fs-sm);margin-bottom:8px}
-.opts{display:flex;flex-wrap:wrap;gap:8px}
-.opt input{position:absolute;opacity:0;pointer-events:none}
-.opt span{display:block;padding:10px 16px;border:1.5px dashed var(--line);border-radius:var(--radius-sm);cursor:pointer;font-size:var(--fs-sm);font-weight:700;background:var(--paper);color:#2B2419}
-.opt span:hover{border-color:var(--muted)}
-.opt span small{display:block;font-weight:400;color:#5C4F3D;font-size:var(--fs-xs)}
-.opt input:checked + span{border-style:solid;border-color:var(--leaf);box-shadow:inset 0 0 0 1.5px var(--leaf)}
-.opt input:focus-visible + span{outline:3px solid var(--orange);outline-offset:2px}
-.qty{display:inline-flex;align-items:center;border:1.5px solid var(--ink);border-radius:var(--wobble)}
-.qty button{width:42px;height:42px;border:0;background:none;color:var(--ink);font-size:1.2rem;cursor:pointer}
-.qty button:disabled{color:var(--line);cursor:not-allowed}
-.qty output{min-width:2.5ch;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
-.total-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding-top:20px;border-top:1.5px dashed var(--line)}
-.total-row .price{font-size:2.4rem}
-.spec{display:grid;grid-template-columns:auto 1fr;gap:6px 20px;font-size:var(--fs-sm)}
-.spec dt{color:var(--muted)}
-.spec dd{margin:0}
-
 
 /* ---------- Hikâye ---------- */
 .story{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(32px,5vw,80px);align-items:start}
@@ -114,5 +75,3 @@ legend{font-weight:700;font-size:var(--fs-sm);margin-bottom:8px}
 .faq details[open] summary::after{content:"−"}
 .faq details p{padding:0 0 22px;color:var(--muted);max-width:68ch}
 
-/* aynı sınıfı paylaşan ürünlere farklı fotoğraf */
-#product-grid .product:nth-child(2) .ph{background-image:url(../images/yigin.jpg)}
