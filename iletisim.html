@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bize Ulaşın · Finike Kooperatifi</title>
+<meta name="description" content="Sipariş, toplu alım, ağaç sahiplenme ve gönüllülük için Finike Kooperatifi iletişim formu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500..700&family=Source+Sans+3:ital,wght@0,400..700;1,400&family=Young+Serif&display=swap">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/iletisim.css">
+<script src="js/main.js" defer></script>
+<script src="js/iletisim.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#icerik">İçeriğe geç</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Ana menü">
+    <a class="brand" href="index.html" aria-label="Finike Tarımsal Kalkınma Kooperatifi, ana sayfa">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text"><strong>Finike Kooperatifi</strong><small>Tarımsal Kalkınma</small></span>
+    </a>
+    <ul class="nav-links desktop">
+<li><a href="index.html">Finike Portakalı</a></li>
+<li><a href="tarifler.html">Tarifler</a></li>
+<li><a href="sosyal.html">Sosyal Medya</a></li>
+<li><a href="iletisim.html" aria-current="page">Bize Ulaşın</a></li>
+<li><a href="lisans.html">Lisans ve Tescil</a></li>
+    </ul>
+    <a class="btn btn-primary desktop" href="index.html#urunler">Sipariş Ver</a>
+    <details class="menu">
+      <summary aria-label="Menüyü aç">Menü</summary>
+      <div class="menu-panel">
+        <ul class="nav-links">
+<li><a href="index.html">Finike Portakalı</a></li>
+<li><a href="tarifler.html">Tarifler</a></li>
+<li><a href="sosyal.html">Sosyal Medya</a></li>
+<li><a href="iletisim.html" aria-current="page">Bize Ulaşın</a></li>
+<li><a href="lisans.html">Lisans ve Tescil</a></li>
+        </ul>
+        <a class="btn btn-primary" href="index.html#urunler">Sipariş Ver</a>
+      </div>
+    </details>
+  </nav>
+</header>
+<main id="icerik">
+
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">İletişim</p>
+    <h1>Sorunuz, siparişiniz ya da teklifiniz için yazın</h1>
+    <p class="lede">Formu doldurun, ilgili ekip arkadaşımız iki iş günü içinde dönüş yapsın. Toplu alım ve kurumsal taleplerde fiyat teklifini e-postayla gönderiyoruz.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:40px">
+  <div class="wrap contact">
+    <form class="card form-card" id="form" novalidate aria-describedby="form-help">
+      <div class="stack" style="gap:6px">
+        <h2 style="font-size:var(--fs-lg)">İletişim formu</h2>
+        <p class="muted" id="form-help" style="font-size:var(--fs-sm)">* ile işaretli alanlar zorunludur.</p>
+      </div>
+      <div class="notice bad" id="form-summary" role="alert" tabindex="-1" hidden></div>
+      <div class="row-2">
+        <div class="field" data-field="ad">
+          <label for="ad">Ad Soyad *</label>
+          <input class="input" id="ad" name="ad" autocomplete="name" required aria-describedby="ad-err">
+          <span class="err" id="ad-err">Adınızı ve soyadınızı yazın.</span>
+        </div>
+        <div class="field" data-field="eposta">
+          <label for="eposta">E-posta *</label>
+          <input class="input" id="eposta" name="eposta" type="email" autocomplete="email" required aria-describedby="eposta-err">
+          <span class="err" id="eposta-err">Geçerli bir e-posta adresi yazın (ör. ad@alanadi.com).</span>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field" data-field="telefon">
+          <label for="telefon">Telefon</label>
+          <input class="input" id="telefon" name="telefon" type="tel" autocomplete="tel" placeholder="05xx xxx xx xx" aria-describedby="telefon-err telefon-hint">
+          <span class="hint" id="telefon-hint">İsteğe bağlı. Sipariş sorunlarında sizi daha hızlı ararız.</span>
+          <span class="err" id="telefon-err">Telefon numarası 10 veya 11 haneli olmalı.</span>
+        </div>
+        <div class="field" data-field="konu">
+          <label for="konu">Konu *</label>
+          <select class="select" id="konu" name="konu" required aria-describedby="konu-err">
+            <option value="">Bir konu seçin</option>
+            <option>Sipariş ve kargo</option>
+            <option>Toplu / Kurumsal alım</option>
+            <option>Ağaç sahiplenme</option>
+            <option>Hasat gönüllülüğü</option>
+            <option>Tarif gönderme</option>
+            <option>Sahte "Finike" ürünü bildirimi</option>
+            <option>Basın</option>
+            <option>Diğer</option>
+          </select>
+          <span class="err" id="konu-err">Mesajınızın konusunu seçin.</span>
+        </div>
+      </div>
+      <div class="field" data-field="mesaj">
+        <label for="mesaj">Mesajınız *</label>
+        <textarea class="textarea" id="mesaj" name="mesaj" maxlength="1500" required aria-describedby="mesaj-err mesaj-count"></textarea>
+        <span class="counter" id="mesaj-count">0 / 1500</span>
+        <span class="err" id="mesaj-err">Mesajınız en az 20 karakter olmalı.</span>
+      </div>
+      <div class="field" data-field="kvkk">
+        <label class="check" for="kvkk"><input type="checkbox" id="kvkk" name="kvkk" required aria-describedby="kvkk-err"><span><a href="lisans.html#kvkk">KVKK Aydınlatma Metni</a>'ni okudum; bilgilerimin talebime yanıt verilmesi amacıyla işlenmesini kabul ediyorum. *</span></label>
+        <span class="err" id="kvkk-err">Devam etmek için aydınlatma metnini onaylayın.</span>
+      </div>
+      <button class="btn btn-primary" type="submit" id="send" style="justify-self:start">Mesajı gönder</button>
+      <div class="notice ok" id="form-ok" role="status" hidden></div>
+    </form>
+
+    <aside class="stack info" style="gap:20px">
+      <div class="card">
+        <h2 style="font-size:var(--fs-lg)">İletişim bilgileri</h2>
+        <dl>
+          <div><dt>Adres</dt><dd>[Mahalle, cadde, no] · Finike / Antalya 07740</dd></div>
+          <div><dt>E-posta</dt><dd><span id="mail">info@[alanadi].com.tr</span><button class="copy" type="button" data-copy="mail">Kopyala</button></dd></div>
+          <div><dt>Telefon</dt><dd><span id="tel">+90 242 [xxx xx xx]</span><button class="copy" type="button" data-copy="tel">Kopyala</button></dd></div>
+          <div><dt>Çalışma saatleri</dt><dd>Hafta içi 08.30-17.30<br>Hasat sezonunda Cumartesi 09.00-13.00</dd></div>
+        </dl>
+      </div>
+      <div class="ph ph-hills map" role="img" aria-label="Görsel alanı: Finike'de kooperatif tesisinin konumu"><span class="ph-label">Harita görseli</span></div>
+      <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Finike%2C%20Antalya" target="_blank" rel="noopener">Haritada aç</a>
+    </aside>
+  </div>
+</section>
+
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="stack">
+        <a class="brand" href="index.html" style="color:#fff">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-text"><strong>Finike Kooperatifi</strong><small style="color:#9FC0AC">Tarımsal Kalkınma</small></span>
+        </a>
+        <p style="font-size:.9375rem;max-width:36ch">Finike'nin üreticilerini bir araya getiren, menşe adı tescilli Finike portakalını bahçeden doğrudan sofraya taşıyan kooperatif.</p>
+        <p style="font-size:.8125rem;color:#9FC0AC">Finike, Antalya 07740 · Türkiye</p>
+      </div>
+      <div>
+        <h4>Site</h4>
+        <ul>
+          <li><a href="index.html#fark">Neden Finike?</a></li>
+          <li><a href="index.html#urunler">Ürünler</a></li>
+          <li><a href="tarifler.html">Tarifler</a></li>
+          <li><a href="sosyal.html">Sosyal Medya</a></li>
+          <li><a href="iletisim.html">Bize Ulaşın</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Politikalar</h4>
+        <ul>
+          <li><a href="lisans.html#cografi-isaret">Coğrafi İşaret</a></li>
+          <li><a href="lisans.html#marka">Marka Kullanımı</a></li>
+          <li><a href="lisans.html#kvkk">KVKK Aydınlatma Metni</a></li>
+          <li><a href="lisans.html#cerez">Çerez Politikası</a></li>
+          <li><a href="lisans.html#satis">Mesafeli Satış ve İade</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Hasat Bülteni</h4>
+        <p style="font-size:.9375rem">Sezon açılışını, ilk hasat tarihini ve kampanyaları ilk siz duyun. Ayda en fazla iki e-posta.</p>
+        <form class="news" id="news-form" novalidate>
+          <label class="sr-only" for="news-email">E-posta adresiniz</label>
+          <input id="news-email" type="email" placeholder="ornek@eposta.com" autocomplete="email" required>
+          <button class="btn" type="submit">Abone Ol</button>
+        </form>
+        <p class="news-msg" id="news-msg" role="status"></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="yil">2026</span> Finike Tarımsal Kalkınma Kooperatifi. Tüm hakları saklıdır.</span>
+      <span>"Finike Portakalı" tescilli bir menşe adıdır.</span>
+      <span>Fotoğraflar geçicidir: Wikimedia Commons, <a href="lisans.html#fotograflar">künyeler</a>.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

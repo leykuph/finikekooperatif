@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tarifler · Finike Kooperatifi</title>
+<meta name="description" content="Finike portakalının kabuğundan suyuna, tatlıdan ana yemeğe tarifler.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500..700&family=Source+Sans+3:ital,wght@0,400..700;1,400&family=Young+Serif&display=swap">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/tarifler.css">
+<script src="js/main.js" defer></script>
+<script src="js/tarifler.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#icerik">İçeriğe geç</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Ana menü">
+    <a class="brand" href="index.html" aria-label="Finike Tarımsal Kalkınma Kooperatifi, ana sayfa">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text"><strong>Finike Kooperatifi</strong><small>Tarımsal Kalkınma</small></span>
+    </a>
+    <ul class="nav-links desktop">
+<li><a href="index.html">Finike Portakalı</a></li>
+<li><a href="tarifler.html" aria-current="page">Tarifler</a></li>
+<li><a href="sosyal.html">Sosyal Medya</a></li>
+<li><a href="iletisim.html">Bize Ulaşın</a></li>
+<li><a href="lisans.html">Lisans ve Tescil</a></li>
+    </ul>
+    <a class="btn btn-primary desktop" href="index.html#urunler">Sipariş Ver</a>
+    <details class="menu">
+      <summary aria-label="Menüyü aç">Menü</summary>
+      <div class="menu-panel">
+        <ul class="nav-links">
+<li><a href="index.html">Finike Portakalı</a></li>
+<li><a href="tarifler.html" aria-current="page">Tarifler</a></li>
+<li><a href="sosyal.html">Sosyal Medya</a></li>
+<li><a href="iletisim.html">Bize Ulaşın</a></li>
+<li><a href="lisans.html">Lisans ve Tescil</a></li>
+        </ul>
+        <a class="btn btn-primary" href="index.html#urunler">Sipariş Ver</a>
+      </div>
+    </details>
+  </nav>
+</header>
+<main id="icerik">
+
+<section class="page-hero">
+  <div class="wrap">
+    <p class="eyebrow">Mutfaktan</p>
+    <h1>Kabuğundan suyuna, hiçbir şeyi atmayın</h1>
+    <p class="lede">İnce kabuğu, bol suyu ve çekirdeksiz dilimleriyle Finike portakalı mutfakta her hâliyle kullanılır. Tariflerde portakalın hangi kısmını kullandığınızı etiketlerden görebilirsiniz.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:40px">
+  <div class="wrap">
+    <div class="filters">
+      <div class="chips" role="group" aria-label="Tarif kategorisi">
+        <button class="chip" type="button" aria-pressed="true" data-filter="hepsi">Tümü</button>
+        <button class="chip" type="button" aria-pressed="false" data-filter="tatli">Tatlı</button>
+        <button class="chip" type="button" aria-pressed="false" data-filter="tuzlu">Tuzlu</button>
+        <button class="chip" type="button" aria-pressed="false" data-filter="icecek">İçecek</button>
+        <button class="chip" type="button" aria-pressed="false" data-filter="kabuk">Kabukla</button>
+        <button class="chip" type="button" aria-pressed="false" data-filter="narenciye">Diğer narenciye</button>
+      </div>
+      <p class="muted num" id="count" style="font-size:var(--fs-sm)" aria-live="polite"></p>
+    </div>
+
+    <div class="grid grid-3" id="recipes">
+      <article class="card recipe" data-cat="icecek">
+        <div class="ph ph-juice" role="img" aria-label="Görsel alanı: taze sıkılmış portakal suyu"><span class="ph-label">Görsel: portakal suyu</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag">Su</span></div>
+          <h3>Taze sıkma portakal suyu</h3>
+          <p class="recipe-facts"><span>5 dk</span><span>Kolay</span><span>2 bardak</span></p>
+          <p class="muted">Bekletmeden içilen portakal suyu en iyisidir. Finike portakalının düşük asidi sayesinde şeker eklemeye gerek kalmaz.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>4-5 adet Finike portakalı</li><li>İsteğe göre birkaç buz</li></ul>
+            <h4>Yapılışı</h4><ol><li>Portakalları oda sıcaklığında tezgâhta hafifçe yuvarlayın; daha fazla su verir.</li><li>İkiye kesip sıkın.</li><li>Posasını süzmeden, 15 dakika içinde için.</li></ol>
+          </details>
+        </div>
+      </article>
+
+      <article class="card recipe" data-cat="tatli kabuk">
+        <div class="ph ph-jar" role="img" aria-label="Görsel alanı: portakal kabuğu reçeli"><span class="ph-label">Görsel: kabuk reçeli</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag">Kabuk</span></div>
+          <h3>Portakal kabuğu reçeli (sarma)</h3>
+          <p class="recipe-facts"><span>1 gün + 1,5 sa</span><span>Orta</span><span>2 kavanoz</span></p>
+          <p class="muted">Kabukları rulo yapıp ipe dizerek pişirilen klasik Akdeniz reçeli. İnce kabuk sayesinde acılığı kolay alınır.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>6 portakalın kabuğu</li><li>3 su bardağı toz şeker</li><li>2,5 su bardağı su</li><li>Yarım limonun suyu</li></ul>
+            <h4>Yapılışı</h4><ol><li>Kabuğun yüzeyini rendenin ince tarafıyla hafifçe sıyırın, 8 dilime ayırıp soyun.</li><li>Kabukları rulo yapıp iğne-iplikle dizin.</li><li>Bir gün boyunca suyunu 3-4 kez değiştirerek bekletin, acılığı çıksın.</li><li>Kaynar suda 10 dk haşlayıp süzün.</li><li>Şeker ve suyu kaynatın, kabukları ekleyip kısık ateşte 1 saat pişirin.</li><li>Limon suyunu ekleyin, 5 dk sonra ipten çıkarıp kavanozlayın.</li></ol>
+          </details>
+        </div>
+      </article>
+
+      <article class="card recipe" data-cat="tatli">
+        <div class="ph ph-dish" role="img" aria-label="Görsel alanı: portakallı irmik tatlısı"><span class="ph-label">Görsel: irmik tatlısı</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag">Su</span><span class="tag">Kabuk rendesi</span></div>
+          <h3>Portakallı irmik tatlısı</h3>
+          <p class="recipe-facts"><span>40 dk</span><span>Kolay</span><span>6 kişilik</span></p>
+          <p class="muted">Sütlü irmiğin üstüne dökülen parlak portakal jölesi. Soğuk servis edilir, sofrada en çok tarif istenen tatlıdır.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>1 litre süt, 1 su bardağı irmik, 1 su bardağı şeker</li><li>1 yemek kaşığı tereyağı</li><li>Sos: 2 su bardağı portakal suyu, 3 yemek kaşığı şeker, 2 yemek kaşığı nişasta, 1 portakalın kabuk rendesi</li></ul>
+            <h4>Yapılışı</h4><ol><li>Süt, irmik ve şekeri kıvam alana kadar karıştırarak pişirin, tereyağını ekleyin.</li><li>Islatılmış kaba döküp ılınmaya bırakın.</li><li>Sos malzemelerini karıştırıp koyulaşana kadar pişirin.</li><li>Sosu irmiğin üzerine dökün, 3 saat buzdolabında dinlendirin.</li></ol>
+          </details>
+        </div>
+      </article>
+
+      <article class="card recipe" data-cat="tuzlu">
+        <div class="ph ph-dish" role="img" aria-label="Görsel alanı: portakallı roka salatası"><span class="ph-label">Görsel: roka salatası</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag">Dilim</span><span class="tag">Su</span></div>
+          <h3>Portakallı, narlı roka salatası</h3>
+          <p class="recipe-facts"><span>15 dk</span><span>Kolay</span><span>4 kişilik</span></p>
+          <p class="muted">Çekirdeksiz dilimler zarından ayrılınca salatanın yıldızı olur. Nar ve ceviz kış sofrasını tamamlar.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>1 demet roka, 2 portakal, yarım nar</li><li>1 küçük kırmızı soğan, bir avuç ceviz</li><li>Sos: 3 yemek kaşığı zeytinyağı, 2 yemek kaşığı portakal suyu, 1 tatlı kaşığı nar ekşisi, tuz</li></ul>
+            <h4>Yapılışı</h4><ol><li>Portakalların kabuğunu beyaz kısmıyla birlikte bıçakla soyun, dilimleri zarlarının arasından çıkarın.</li><li>Soğanı ince halka doğrayın.</li><li>Tüm malzemeyi tabağa dizin, sosu servis anında gezdirin.</li></ol>
+          </details>
+        </div>
+      </article>
+
+      <article class="card recipe" data-cat="tuzlu">
+        <div class="ph ph-dish" role="img" aria-label="Görsel alanı: portakallı fırın tavuk"><span class="ph-label">Görsel: fırın tavuk</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag">Su</span><span class="tag">Dilim</span></div>
+          <h3>Portakallı fırın tavuk baget</h3>
+          <p class="recipe-facts"><span>1 sa 10 dk</span><span>Kolay</span><span>4 kişilik</span></p>
+          <p class="muted">Portakal suyu ve balla karamelize olan tavuk. Tatlı-tuzlu dengeyi düşük asitli Finike portakalı kurar.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>8 baget</li><li>1 su bardağı portakal suyu, 1 portakalın kabuk rendesi</li><li>2 yemek kaşığı bal, 2 diş sarımsak, 2 yemek kaşığı zeytinyağı</li><li>Tuz, karabiber, kekik</li><li>1 portakal, halka dilimlenmiş</li></ul>
+            <h4>Yapılışı</h4><ol><li>Sos malzemelerini karıştırıp tavuğu en az 30 dk marine edin.</li><li>Portakal halkalarını tepsiye dizip tavukları üzerine yerleştirin.</li><li>200 °C fırında, arada sosla yağlayarak 40 dk pişirin.</li></ol>
+          </details>
+        </div>
+      </article>
+
+      <article class="card recipe" data-cat="tatli kabuk">
+        <div class="ph ph-peel" role="img" aria-label="Görsel alanı: şekerlenmiş portakal kabuğu"><span class="ph-label">Görsel: şekerleme</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag">Kabuk</span></div>
+          <h3>Şekerlenmiş portakal kabuğu</h3>
+          <p class="recipe-facts"><span>2 sa + kuruma</span><span>Orta</span><span>1 kavanoz</span></p>
+          <p class="muted">Sıktığınız portakalların kabuğunu çöpe atmayın. Bitter çikolataya batırınca kahvenin yanına hazır ikram olur.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>4 portakalın kabuğu</li><li>2 su bardağı şeker + bulamak için yarım bardak</li><li>1 su bardağı su</li></ul>
+            <h4>Yapılışı</h4><ol><li>Kabukları parmak kalınlığında şeritler hâlinde kesin.</li><li>Kaynar suda 3 kez, her seferinde suyu değiştirerek 5'er dk haşlayın.</li><li>Şerbette kısık ateşte 45-60 dk, kabuklar yarı saydam olana kadar pişirin.</li><li>Süzüp bir gece kurutun, şekere bulayın.</li></ol>
+          </details>
+        </div>
+      </article>
+
+      <article class="card recipe" data-cat="icecek kabuk">
+        <div class="ph ph-juice" role="img" aria-label="Görsel alanı: portakal kabuklu kış çayı"><span class="ph-label">Görsel: kış çayı</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag">Kabuk</span><span class="tag">Kuru dilim</span></div>
+          <h3>Portakal kabuklu tarçınlı kış çayı</h3>
+          <p class="recipe-facts"><span>10 dk</span><span>Kolay</span><span>4 bardak</span></p>
+          <p class="muted">Kurutulmuş kabuk veya dilimlerle demlenen, şekersiz bile tatlı aromalı bir kış içeceği.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>1 litre su</li><li>Bir avuç kurutulmuş portakal kabuğu veya 4-5 kuru dilim</li><li>1 çubuk tarçın, 3 karanfil</li></ul>
+            <h4>Yapılışı</h4><ol><li>Suyu kaynatın, tüm malzemeyi ekleyip ocağı kapatın.</li><li>Kapağı kapalı 7 dk demlendirin, süzüp servis edin.</li></ol>
+          </details>
+        </div>
+      </article>
+
+      <article class="card recipe" data-cat="narenciye tuzlu">
+        <div class="ph ph-dish" role="img" aria-label="Görsel alanı: limonlu zeytinyağlı enginar"><span class="ph-label">Görsel: zeytinyağlı enginar</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag tag-leaf">Limon</span><span class="tag">Portakal suyu</span></div>
+          <h3>Portakallı zeytinyağlı enginar</h3>
+          <p class="recipe-facts"><span>45 dk</span><span>Orta</span><span>4 kişilik</span></p>
+          <p class="muted">Enginar kararmasın diye limon, tatlı bir derinlik için portakal suyu. Finike limonuyla iki narenciye bir arada.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>6 enginar çanağı, 1 limon</li><li>1 su bardağı portakal suyu, yarım su bardağı zeytinyağı</li><li>1 havuç, 1 kuru soğan, 1 tatlı kaşığı şeker, tuz, dereotu</li></ul>
+            <h4>Yapılışı</h4><ol><li>Enginarları limonlu suda bekletin.</li><li>Soğan ve havucu zeytinyağında hafifçe çevirin.</li><li>Enginarları dizin, portakal suyu, yarım bardak su, şeker ve tuzu ekleyip 30 dk pişirin.</li><li>Soğuk, dereotuyla servis edin.</li></ol>
+          </details>
+        </div>
+      </article>
+
+      <article class="card recipe" data-cat="narenciye icecek">
+        <div class="ph ph-juice" role="img" aria-label="Görsel alanı: ev yapımı limonata"><span class="ph-label">Görsel: limonata</span></div>
+        <div class="recipe-body">
+          <div class="part"><span class="tag tag-leaf">Limon</span><span class="tag">Portakal</span></div>
+          <h3>Portakallı ev limonatası</h3>
+          <p class="recipe-facts"><span>20 dk + 1 gece</span><span>Kolay</span><span>2 litre</span></p>
+          <p class="muted">Kabukların yağını şekerle çıkaran geleneksel yöntem. Portakal limonun keskinliğini yumuşatır.</p>
+          <details><summary>Tarifi göster</summary>
+            <h4>Malzemeler</h4><ul><li>4 limon, 2 portakal</li><li>1,5 su bardağı şeker</li><li>2 litre soğuk su, nane</li></ul>
+            <h4>Yapılışı</h4><ol><li>Kabukları ince soyup şekerle ovalayın, 30 dk bekletin.</li><li>Meyvelerin suyunu sıkıp ekleyin, şeker eriyene kadar karıştırın.</li><li>Suyu ekleyip bir gece buzdolabında dinlendirin, süzüp naneyle servis edin.</li></ol>
+          </details>
+        </div>
+      </article>
+    </div>
+    <p class="empty" id="empty" hidden>Bu kategoride henüz tarif yok.</p>
+
+    <div class="tip">
+      <div class="card"><span class="eyebrow">Saklama</span><p>Portakalları poşette değil, havadar bir kasada saklayın. Buzdolabının sebzeliğinde ömrü uzar, ama en aromatik hâli oda sıcaklığındadır.</p></div>
+      <div class="card"><span class="eyebrow">Kabuk</span><p>Kabuğu kullanacağınız tariflerde portakalı ılık suda fırçayla yıkayın, yalnızca turuncu kısmını rendeleyin. Beyaz kısım acılık verir.</p></div>
+      <div class="card"><span class="eyebrow">Tarifinizi paylaşın</span><p>Finike portakalıyla yaptığınız tarifi <a href="iletisim.html#form">bize gönderin</a>; seçtiklerimizi adınızla bu sayfada yayımlayalım.</p></div>
+    </div>
+  </div>
+</section>
+
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="stack">
+        <a class="brand" href="index.html" style="color:#fff">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-text"><strong>Finike Kooperatifi</strong><small style="color:#9FC0AC">Tarımsal Kalkınma</small></span>
+        </a>
+        <p style="font-size:.9375rem;max-width:36ch">Finike'nin üreticilerini bir araya getiren, menşe adı tescilli Finike portakalını bahçeden doğrudan sofraya taşıyan kooperatif.</p>
+        <p style="font-size:.8125rem;color:#9FC0AC">Finike, Antalya 07740 · Türkiye</p>
+      </div>
+      <div>
+        <h4>Site</h4>
+        <ul>
+          <li><a href="index.html#fark">Neden Finike?</a></li>
+          <li><a href="index.html#urunler">Ürünler</a></li>
+          <li><a href="tarifler.html">Tarifler</a></li>
+          <li><a href="sosyal.html">Sosyal Medya</a></li>
+          <li><a href="iletisim.html">Bize Ulaşın</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Politikalar</h4>
+        <ul>
+          <li><a href="lisans.html#cografi-isaret">Coğrafi İşaret</a></li>
+          <li><a href="lisans.html#marka">Marka Kullanımı</a></li>
+          <li><a href="lisans.html#kvkk">KVKK Aydınlatma Metni</a></li>
+          <li><a href="lisans.html#cerez">Çerez Politikası</a></li>
+          <li><a href="lisans.html#satis">Mesafeli Satış ve İade</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Hasat Bülteni</h4>
+        <p style="font-size:.9375rem">Sezon açılışını, ilk hasat tarihini ve kampanyaları ilk siz duyun. Ayda en fazla iki e-posta.</p>
+        <form class="news" id="news-form" novalidate>
+          <label class="sr-only" for="news-email">E-posta adresiniz</label>
+          <input id="news-email" type="email" placeholder="ornek@eposta.com" autocomplete="email" required>
+          <button class="btn" type="submit">Abone Ol</button>
+        </form>
+        <p class="news-msg" id="news-msg" role="status"></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="yil">2026</span> Finike Tarımsal Kalkınma Kooperatifi. Tüm hakları saklıdır.</span>
+      <span>"Finike Portakalı" tescilli bir menşe adıdır.</span>
+      <span>Fotoğraflar geçicidir: Wikimedia Commons, <a href="lisans.html#fotograflar">künyeler</a>.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

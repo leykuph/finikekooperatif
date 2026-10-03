@@ -1,0 +1,20 @@
+.accounts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px;margin-bottom:40px}
+.account{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink)}
+.account:hover{border-color:var(--leaf)}
+.pf{width:44px;height:44px;border-radius:var(--radius);display:grid;place-items:center;font:700 .8rem var(--font-mono);color:#fff;flex:none}
+.pf-ig{background:linear-gradient(135deg,#F58529,#DD2A7B 55%,#8134AF)}
+.pf-yt{background:#C4302B}
+.pf-x{background:#111}
+.pf-fb{background:#1877F2}
+.account small{display:block;color:var(--muted);font-size:var(--fs-xs)}
+.feed{columns:3 300px;column-gap:20px}
+.post{break-inside:avoid;margin-bottom:20px;padding:0;overflow:hidden}
+.post .ph{border-radius:0}
+.post-body{padding:18px;display:grid;gap:10px}
+.post-top{display:flex;align-items:center;gap:10px;font-size:var(--fs-sm)}
+.post-top .pf{width:28px;height:28px;border-radius:var(--radius-sm);font-size:.6rem}
+.post-top time{margin-left:auto;color:var(--muted);font-size:var(--fs-xs);font-family:var(--font-mono)}
+.post-stats{display:flex;gap:16px;font:500 var(--fs-xs) var(--font-mono);color:var(--muted)}
+.dev-note{margin-top:48px}
+.dev-note code{font-family:ui-monospace,"Cascadia Mono",monospace;font-size:.85em;background:var(--surface-2);padding:2px 6px;border-radius:4px}
+.dev-note ol{margin:0;padding-left:20px;display:grid;gap:8px;font-size:var(--fs-sm)}

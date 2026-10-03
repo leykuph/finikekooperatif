@@ -1,0 +1,12 @@
+.contact{display:grid;grid-template-columns:1.3fr .7fr;gap:clamp(24px,4vw,56px);align-items:start}
+@media (max-width:880px){.contact{grid-template-columns:1fr}}
+.form-card{padding:clamp(20px,3vw,36px);gap:20px}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:560px){.row-2{grid-template-columns:1fr}}
+.info dl{display:grid;gap:14px;margin:0}
+.info dt{font:500 var(--fs-xs) var(--font-mono);color:var(--muted)}
+.info dd{margin:2px 0 0;font-weight:600;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.copy{font:500 var(--fs-xs) var(--font-body);padding:4px 10px;border-radius:var(--radius);border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.copy:hover{border-color:var(--leaf)}
+.map{aspect-ratio:4/3}
+.counter{font:500 var(--fs-xs) var(--font-mono);color:var(--muted);text-align:right}

@@ -1,0 +1,6 @@
+# AI araç klasörleri (yalnızca yerel)
+.agents/
+.claude/
+.codex/
+.impeccable/
+skills-lock.json
