@@ -54,7 +54,7 @@
 /* ---------- Hikâye ---------- */
 .story{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(32px,5vw,80px);align-items:start}
 @media (max-width:880px){.story{grid-template-columns:1fr}}
-.story .ph{aspect-ratio:4/5;rotate:-2deg;background-image:url(../images/anit.jpg)}
+.story .ph{aspect-ratio:4/5;rotate:-2deg;background-image:url(../images/arykanda.jpg)}
 .timeline{list-style:none;margin:32px 0 0;padding:0;display:grid}
 .timeline li{display:grid;grid-template-columns:minmax(0,8.5rem) 1fr;gap:16px;padding-block:12px;border-top:1.5px dashed var(--line)}
 .timeline b{font-family:var(--font-hand);font-size:1.6rem;line-height:1.1;color:var(--orange-ink)}
