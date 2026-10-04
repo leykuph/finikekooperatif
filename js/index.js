@@ -65,6 +65,40 @@
   addEventListener("scroll",function(){if(!queued){queued=true;requestAnimationFrame(frame);}},{passive:true});
   frame();
 
+  /* Banner derinliği: fotoğraf yazıdan yavaş kayar, yazı hafifçe solar. Süzülen dilimler kendi
+     derinliklerinde kayar. */
+  var heroEl=document.querySelector(".hero"), copies=[].slice.call(document.querySelectorAll(".slide-copy"));
+  var fls=[].slice.call(document.querySelectorAll(".fl")), fark=document.getElementById("fark"), dq=false;
+  function depth(){
+    dq=false;
+    var y=scrollY;
+    if(heroEl&&y<heroEl.offsetHeight){
+      heroEl.style.setProperty("--hero-py",(y*.35).toFixed(1)+"px");
+      var o=Math.max(0,1-y/(heroEl.offsetHeight*.75)).toFixed(3);
+      copies.forEach(function(c){c.style.opacity=o;});
+    }
+    if(fark&&fls.length){
+      var r=fark.getBoundingClientRect();
+      if(r.bottom>0&&r.top<vh) fls.forEach(function(f){f.style.setProperty("--fy",(-(r.top-vh/2)*(+f.dataset.depth)).toFixed(1)+"px");});
+    }
+  }
+  addEventListener("scroll",function(){if(!dq){dq=true;requestAnimationFrame(depth);}},{passive:true});
+  depth();
+
+  /* Kaydırınca belirme: başlıklar, metinler, rakamlar, özellikler, zaman çizelgesi, SSS. Listeler sırayla. */
+  if("IntersectionObserver" in window){
+    var groups=[[".stat",.08],[".trait",.07],[".timeline li",.1],[".faq details",.07],[".checklist li",.07]];
+    var singles=".section-head, .geo .stack, .story .stack, .reviews";
+    [].forEach.call(document.querySelectorAll(singles),function(el){el.classList.add("reveal");});
+    groups.forEach(function(g){[].forEach.call(document.querySelectorAll(g[0]),function(el,k){
+      el.classList.add("reveal"); el.style.setProperty("--d",Math.min(k*g[1],.5).toFixed(2)+"s");
+    });});
+    var ro=new IntersectionObserver(function(es){es.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add("in");ro.unobserve(e.target);}
+    });},{threshold:.12,rootMargin:"0px 0px -6% 0px"});
+    [].forEach.call(document.querySelectorAll(".reveal"),function(el){ro.observe(el);});
+  }
+
   /* Kayan şerit ekran dışındayken durur */
   var ribbon=document.querySelector(".ribbon");
   if(ribbon&&"IntersectionObserver" in window){
