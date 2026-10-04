@@ -4,3 +4,9 @@
 .codex/
 .impeccable/
 skills-lock.json
+
+# Python önbelleği
+__pycache__/
+
+# Tasarım aracı ürün notları (yalnızca yerel)
+PRODUCT.md
