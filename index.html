@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/index.css">
 <script src="js/main.js" defer></script>
+<script src="js/index.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#icerik">İçeriğe geç</a>
@@ -44,24 +45,34 @@
 <main id="icerik">
 
 <!-- HERO -->
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <p class="eyebrow">Finike'den, doğrudan bahçeden</p>
-      <h1>Her portakal <em class="mark">Finike portakalı</em> değil.</h1>
+<section class="hero" aria-labelledby="hero-baslik">
+  <div class="wrap hero-inner">
+    <div class="hero-copy">
+      <h1 id="hero-baslik">Her portakal <em class="mark">Finike portakalı</em> değil.</h1>
       <p class="lede">Akdağ ile Gülmez Dağı arasındaki ovada yetişen, ince kabuklu, çekirdeksiz ve ağızda posa bırakmayan Washington Navel. Kooperatif ortaklarımızın bahçesinden, aracısız olarak sofranıza geliyor.</p>
       <div class="btn-row">
         <a class="btn btn-primary" href="#fark">Farkı keşfet</a>
         <a class="btn btn-ghost" href="tarifler.html">Tariflere göz at</a>
       </div>
     </div>
-    <div class="collage">
-      <figure class="print c1"><div class="ph"><img src="images/dal.jpg" alt="Dalında olgunlaşmış portakallar" width="1400" height="960"></div><figcaption>dalında, hasattan önce</figcaption></figure>
-      <figure class="print c2"><div class="ph"><img src="images/liman.jpg" alt="Finike limanı ve arkasındaki tepeler" width="1400" height="1050"></div><figcaption>Finike limanı</figcaption></figure>
-      <figure class="print c3"><div class="ph"><img src="images/kesit.jpg" alt="Yakından portakal kesiti, sulu dilimler" width="1400" height="788"></div><figcaption>sulu dilimler</figcaption></figure>
+    <div class="hero-prints">
+      <figure class="print p1" data-depth=".55"><div class="ph"><img src="images/dal.jpg" alt="Dalında olgunlaşmış portakallar" width="1400" height="960" fetchpriority="high"></div><figcaption>dalında, hasattan önce</figcaption></figure>
+      <figure class="print p2" data-depth=".3"><div class="ph"><img src="images/liman.jpg" alt="Finike limanı ve arkasındaki tepeler" width="1400" height="1050"></div><figcaption>Finike limanı</figcaption></figure>
+      <figure class="print p3" data-depth=".8"><div class="ph"><img src="images/kesit.jpg" alt="Yakından portakal kesiti, sulu dilimler" width="1400" height="788"></div><figcaption>sulu dilimler</figcaption></figure>
+      <figure class="print p4" data-depth=".42"><div class="ph"><img src="images/yigin.jpg" alt="Kesilmiş ve bütün portakallar bir arada" width="1242" height="1400"></div><figcaption>kasadan sofraya</figcaption></figure>
     </div>
   </div>
 </section>
+
+<!-- ŞERİT -->
+<div class="ribbon" aria-hidden="true">
+  <div class="ribbon-track">
+    <span>ince kabuk</span><span>çekirdeksiz</span><span>ağızda posa bırakmaz</span><span>menşe adı tescilli</span><span>Aralık – Şubat</span><span>aracısız, bahçeden</span>
+    <span>ince kabuk</span><span>çekirdeksiz</span><span>ağızda posa bırakmaz</span><span>menşe adı tescilli</span><span>Aralık – Şubat</span><span>aracısız, bahçeden</span>
+    <span>ince kabuk</span><span>çekirdeksiz</span><span>ağızda posa bırakmaz</span><span>menşe adı tescilli</span><span>Aralık – Şubat</span><span>aracısız, bahçeden</span>
+    <span>ince kabuk</span><span>çekirdeksiz</span><span>ağızda posa bırakmaz</span><span>menşe adı tescilli</span><span>Aralık – Şubat</span><span>aracısız, bahçeden</span>
+  </div>
+</div>
 
 <!-- RAKAMLAR -->
 <section aria-labelledby="rakam-baslik" id="rakamlar">
