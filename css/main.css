@@ -118,7 +118,7 @@ a:hover{text-decoration-thickness:2px}
 .btn-row{display:flex;flex-wrap:wrap;gap:14px}
 
 /* ---------- Fotoğraflar ----------
-   .ph alanları geçici Wikimedia Commons fotoğraflarıyla dolu (künye: lisans.html#fotograflar).
+   .ph alanları geçici Wikimedia Commons fotoğraflarıyla dolu (künye: /lisans#fotograflar).
    Kendi fotoğrafınızı eklemek için images/ klasöründeki aynı adlı dosyayı değiştirin. */
 .ph{position:relative;overflow:hidden;display:flex;align-items:flex-end;max-width:100%;background:var(--surface-2) center/cover no-repeat;border-radius:var(--radius-sm)}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
