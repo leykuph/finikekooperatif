@@ -3,8 +3,26 @@
 .recipe .ph{aspect-ratio:16/10;border-radius:0}
 .recipe-body{padding:22px;display:grid;gap:12px;align-content:start}
 .recipe-facts{display:flex;flex-wrap:wrap;gap:6px 16px;font:500 var(--fs-xs) var(--font-mono);color:var(--muted)}
-.recipe details{border-top:1px solid var(--line);padding-top:12px}
-.recipe summary{cursor:pointer;font-weight:600;color:var(--leaf)}
+.recipe{position:relative;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.recipe:hover{transform:translateY(-3px);box-shadow:4px 4px 0 var(--ink);border-color:var(--ink)}
+.recipe:has(.recipe-open:focus-visible){outline:3px solid var(--leaf);outline-offset:3px}
+.recipe-full{display:none}
+.recipe-open{justify-self:start;margin-top:4px;padding:12px 0 0;border:0;border-top:1px solid var(--line);width:100%;text-align:left;background:none;font:600 var(--fs-sm) var(--font-body);color:var(--leaf);cursor:pointer}
+.recipe-open::after{content:"";position:absolute;inset:0}
+.recipe-open:focus-visible{outline:none}
+.recipe-open::before{content:"→ "}
+html:has(.recipe-dialog[open]){overflow:hidden}
+.recipe-dialog{width:min(640px,calc(100vw - 32px));max-height:calc(100dvh - 48px);padding:0;border:2px solid var(--ink);border-radius:var(--radius);background:var(--surface);color:var(--ink);box-shadow:6px 6px 0 var(--ink);overflow:auto;overscroll-behavior:contain}
+.recipe-dialog::backdrop{background:rgb(20 15 10 / .55);backdrop-filter:blur(3px)}
+.recipe-dialog .ph{aspect-ratio:16/8;border-radius:0}
+.recipe-dialog .recipe-body{padding:28px}
+.recipe-dialog h3{font-size:var(--fs-xl);line-height:1.15}
+.recipe-dialog .recipe-full{display:block;border-top:1px solid var(--line);padding-top:8px}
+.recipe-dialog .recipe-open{display:none}
+.recipe-dialog h4{font-size:var(--fs-sm);margin:18px 0 8px;font-family:var(--font-mono);color:var(--muted);font-weight:500}
+.recipe-dialog ul,.recipe-dialog ol{margin:0;padding-left:22px;display:grid;gap:8px;font-size:var(--fs-md)}
+.dialog-close{position:sticky;top:12px;float:right;margin:12px 12px -56px 0;z-index:1;width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:var(--surface);color:var(--ink);font-size:1.25rem;line-height:1;cursor:pointer}
+.dialog-close:hover{background:var(--surface-2)}
 .recipe h4{font-size:var(--fs-sm);margin:14px 0 6px;font-family:var(--font-mono);color:var(--muted);font-weight:500}
 .recipe ul,.recipe ol{margin:0;padding-left:20px;display:grid;gap:4px;font-size:var(--fs-sm)}
 .part{display:flex;gap:6px;flex-wrap:wrap}
