@@ -127,7 +127,7 @@
 @keyframes reviews{to{transform:translate3d(-50%,0,0)}}
 .review:nth-child(2n){rotate:.6deg}.review:nth-child(2n+1){rotate:-.5deg}
 .stars{color:var(--orange);letter-spacing:2px}
-.review footer{font-family:var(--font-hand);font-size:1.3rem;color:var(--muted)}
+.review footer{font-family:var(--font-hand);font-size:1.25rem;color:var(--muted)}
 
 /* ---------- SSS ---------- */
 .faq{display:grid;max-width:860px;border-bottom:1.5px dashed var(--line)}
