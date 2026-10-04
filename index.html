@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="css/main.css?v=6">
 <link rel="stylesheet" href="css/index.css?v=11">
 <script src="js/main.js?v=2" defer></script>
-<script src="js/index.js?v=4" defer></script>
+<script src="js/index.js?v=6" defer></script>
 </head>
 <body>
 <a class="skip" href="#icerik">İçeriğe geç</a>
@@ -47,22 +47,49 @@
 </header>
 <main id="icerik">
 
-<!-- HERO -->
-<section class="hero" aria-labelledby="hero-baslik">
-  <div class="wrap hero-inner">
-    <div class="hero-copy">
-      <h1 id="hero-baslik">Her portakal <em class="mark">Finike portakalı</em> değil.</h1>
-      <p class="lede">Akdağ ile Gülmez Dağı arasındaki ovada yetişen, ince kabuklu, çekirdeksiz ve ağızda posa bırakmayan Washington Navel. Kooperatif ortaklarımızın bahçesinden, aracısız olarak sofranıza geliyor.</p>
-      <div class="btn-row">
-        <a class="btn btn-primary" href="#fark">Farkı keşfet</a>
-        <a class="btn btn-ghost" href="/tarifler">Tariflere göz at</a>
+<!-- HERO: tam genişlik, yana kayan büyük fotoğraf banner'ı (js/index.js) -->
+<section class="hero" aria-roledescription="karosel" aria-label="Finike portakalı">
+  <div class="slides">
+    <div class="slides-track">
+      <div class="slide is-active" role="group" aria-roledescription="slayt" aria-label="1 / 4">
+        <img src="images/dal.jpg" alt="Dalında olgunlaşmış Finike portakalları" width="1400" height="960" style="object-position:center 40%" fetchpriority="high">
+        <div class="wrap slide-copy">
+          <h1 id="hero-baslik">Her portakal <em class="mark">Finike portakalı</em> değil</h1>
+          <p class="lede">Akdağ ile Gülmez Dağı arasındaki ovada yetişen, ince kabuklu, çekirdeksiz ve ağızda posa bırakmayan Washington Navel. Kooperatif ortaklarımızın bahçesinden, aracısız olarak sofranıza geliyor.</p>
+          <div class="btn-row"><a class="btn btn-primary" href="#fark">Farkı keşfet</a><a class="btn btn-light" href="/tarifler">Tariflere göz at</a></div>
+        </div>
+      </div>
+      <div class="slide" role="group" aria-roledescription="slayt" aria-label="2 / 4">
+        <img src="images/kesit.jpg" alt="Yakından portakal kesiti, sulu dilimler" width="1400" height="788" style="object-position:center" loading="lazy">
+        <div class="wrap slide-copy">
+          <h2>İnce kabuk, çekirdeksiz, posa bırakmaz</h2>
+          <p class="lede">Menşe adı tescilli Finike portakalını farklı kılan nitelikler tescil belgesinde yazılı.</p>
+          <div class="btn-row"><a class="btn btn-primary" href="#fark">Altı özelliği görün</a></div>
+        </div>
+      </div>
+      <div class="slide" role="group" aria-roledescription="slayt" aria-label="3 / 4">
+        <img src="images/yigin.jpg" alt="Kesilmiş ve bütün portakallar bir arada" width="1242" height="1400" style="object-position:center 35%" loading="lazy">
+        <div class="wrap slide-copy">
+          <h2>Kabuğundan suyuna, hiçbir şeyi atmayın</h2>
+          <p class="lede">Reçelden tatlıya, taze sıkma sudan kurutulmuş dilime: Finike portakalıyla tarifler.</p>
+          <div class="btn-row"><a class="btn btn-primary" href="/tarifler">Tariflere göz at</a></div>
+        </div>
+      </div>
+      <div class="slide" role="group" aria-roledescription="slayt" aria-label="4 / 4">
+        <img src="images/liman.jpg" alt="Finike limanı ve arkasındaki tepeler" width="1400" height="1050" style="object-position:center" loading="lazy">
+        <div class="wrap slide-copy">
+          <h2>Likya’nın kıyısında, üreticinin kooperatifi</h2>
+          <p class="lede">Finike’nin portakal üreticileri ürünlerini tek çatı altında topluyor ve aracısız ulaştırıyor.</p>
+          <div class="btn-row"><a class="btn btn-primary" href="#hikaye">Hikâyemizi okuyun</a></div>
+        </div>
       </div>
     </div>
-    <div class="hero-prints">
-      <figure class="print p1" data-depth=".55"><div class="ph"><img src="images/dal.jpg" alt="Dalında olgunlaşmış portakallar" width="1400" height="960" fetchpriority="high"></div><figcaption>dalında, hasattan önce</figcaption></figure>
-      <figure class="print p2" data-depth=".3"><div class="ph"><img src="images/liman.jpg" alt="Finike limanı ve arkasındaki tepeler" width="1400" height="1050"></div><figcaption>Finike limanı</figcaption></figure>
-      <figure class="print p3" data-depth=".8"><div class="ph"><img src="images/kesit.jpg" alt="Yakından portakal kesiti, sulu dilimler" width="1400" height="788"></div><figcaption>sulu dilimler</figcaption></figure>
-      <figure class="print p4" data-depth=".42"><div class="ph"><img src="images/yigin.jpg" alt="Kesilmiş ve bütün portakallar bir arada" width="1242" height="1400"></div><figcaption>kasadan sofraya</figcaption></figure>
+  </div>
+  <div class="wrap slides-nav">
+    <div class="dots" role="group" aria-label="Slayt seç"></div>
+    <div class="arrows">
+      <button class="arrow prev" type="button" aria-label="Önceki slayt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="arrow next" type="button" aria-label="Sonraki slayt"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
     </div>
   </div>
 </section>
