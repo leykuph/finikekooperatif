@@ -55,6 +55,22 @@
     new IntersectionObserver(function(es){ribbon.classList.toggle("paused",!es[0].isIntersecting);}).observe(ribbon);
   }
 
+  /* Yorum kartları: sonsuz kayan karosel. Kartlar HTML'de bir kez yazılır; döngü için kopyaları
+     burada eklenir (ekran okuyucudan gizli, tıklanamaz). Üzerine gelince veya odaklanınca durur. */
+  var rv=document.querySelector(".reviews");
+  if(rv&&rv.children.length){
+    var cards=[].slice.call(rv.children), track=document.createElement("div");
+    track.className="reviews-track";
+    cards.forEach(function(c){track.appendChild(c);});
+    rv.appendChild(track); rv.classList.add("is-marquee");
+    var setW=track.scrollWidth, reps=Math.max(1,Math.ceil(rv.clientWidth/setW));
+    for(var i=1;i<reps*2;i++) cards.forEach(function(c){
+      var k=c.cloneNode(true); k.setAttribute("aria-hidden","true"); k.setAttribute("inert",""); track.appendChild(k);
+    });
+    track.style.setProperty("--dur",(setW*reps/28).toFixed(0)+"s"); /* ~28px/sn */
+    if("IntersectionObserver" in window) new IntersectionObserver(function(es){rv.classList.toggle("paused",!es[0].isIntersecting);}).observe(rv);
+  }
+
   /* Özellik tikleri liste görünüme girince sırayla çizilir */
   var traits=document.querySelector(".traits");
   if(traits&&"IntersectionObserver" in window){
