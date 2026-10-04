@@ -165,11 +165,11 @@ a:hover{text-decoration-thickness:2px}
 .news-msg{font-size:var(--fs-xs);margin-top:8px;min-height:1.2em;color:#F5B27A}
 
 /* ---------- Form (default + hata durumu) ---------- */
-.field{display:grid;gap:6px;min-width:0}
+.field{display:grid;gap:6px;min-width:0;align-content:start}
 .field label{font-weight:700;font-size:var(--fs-sm)}
 .field .hint{font-size:var(--fs-xs);color:var(--muted)}
 .input,.select,.textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:#2B2419;font:inherit;font-size:var(--fs-md)}
-.input::placeholder,.textarea::placeholder{color:#7A6B55}
+.input::placeholder,.textarea::placeholder{color:#6B5D48}
 .input:hover,.select:hover,.textarea:hover{border-color:var(--muted)}
 .input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px color-mix(in srgb,var(--leaf) 25%,transparent)}
 .textarea{min-height:150px;resize:vertical}
