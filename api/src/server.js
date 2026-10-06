@@ -354,6 +354,53 @@ async function removeTrees(req, res, id) {
   send(res, 200, { ok: true });
 }
 
+// Herkese açık üretici haritası (/ureticilerimiz). İsim, kullanıcı adı, ada/parsel numarası verilmez;
+// yalnızca aktif ortakların parsel sınırları, nitelik, alan ve ağaç toplamları. Hisseli parsel bir kez gösterilir.
+const PUBLIC_MAP_TTL_MS = 10 * 60 * 1000;
+let publicMapCache = null;
+
+function roundGeometry(g) {
+  const r = (c) => (typeof c[0] === "number" ? c.map((n) => Math.round(n * 1e6) / 1e6) : c.map(r));
+  return g && g.coordinates ? { type: g.type, coordinates: r(g.coordinates) } : null;
+}
+
+async function publicMap(req, res) {
+  if (!publicMapCache || publicMapCache.expiresAt < Date.now()) {
+    const { rows: [t] } = await pool.query("SELECT count(*)::int AS members FROM members WHERE active");
+    const { rows } = await pool.query(
+      `SELECT p.mahalle_id, p.ada, p.parsel, min(p.mahalle_name) AS mahalle, min(p.nitelik) AS nitelik,
+              max(p.area_m2) AS area_m2, (array_agg(p.geometry) FILTER (WHERE p.geometry IS NOT NULL))[1] AS geometry,
+              COALESCE(sum(t.trees), 0)::int AS trees, COALESCE(sum(t.tons), 0) AS tons
+         FROM parcels p JOIN members m ON m.id = p.member_id AND m.active
+         LEFT JOIN (SELECT parcel_id, sum(tree_count) AS trees, sum(est_tons) AS tons FROM trees GROUP BY parcel_id) t
+                ON t.parcel_id = p.id
+        GROUP BY p.mahalle_id, p.ada, p.parsel`
+    );
+    const parcels = rows.map((r) => ({
+      mahalle: r.mahalle, nitelik: r.nitelik, areaM2: r.area_m2 === null ? null : Number(r.area_m2),
+      trees: r.trees, tons: Number(r.tons), geometry: roundGeometry(r.geometry),
+    }));
+    // Sıra veritabanındaki kayıt sırasını (ve dolayısıyla ortakları) ele vermesin diye karıştırılır.
+    for (let i = parcels.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [parcels[i], parcels[j]] = [parcels[j], parcels[i]];
+    }
+    const sum = (k) => parcels.reduce((a, p) => a + (p[k] || 0), 0);
+    publicMapCache = {
+      expiresAt: Date.now() + PUBLIC_MAP_TTL_MS,
+      body: {
+        totals: {
+          members: t.members, parcels: parcels.length, areaM2: Math.round(sum("areaM2")),
+          trees: sum("trees"), tons: Math.round(sum("tons") * 10) / 10,
+          mahalleler: new Set(parcels.map((p) => p.mahalle)).size,
+        },
+        parcels,
+      },
+    };
+  }
+  send(res, 200, publicMapCache.body, { "Cache-Control": "public, max-age=600" });
+}
+
 async function allParcels(req, res) {
   await requireMember(req, { admin: true });
   const { rows } = await pool.query(
@@ -531,6 +578,7 @@ async function health(req, res) {
 
 const routes = {
   "GET /health": health,
+  "GET /public/map": publicMap,
   "GET /tkgm/mahalleler": listMahalleler,
   "GET /tkgm/parsel": lookupParcel,
   "GET /parcels": myParcels,

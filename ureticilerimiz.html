@@ -6,45 +6,45 @@
 <link rel="icon" href="/icon.png" type="image/png" sizes="160x160">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<title>Mesajlar · Yönetim · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
-<meta name="description" content="S.S. Finike Tarımsal Kalkınma Kooperatifi yönetim paneli: iletişim formundan gelen mesajlar.">
-<meta name="robots" content="noindex">
+<title>Üreticilerimiz · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
+<meta name="description" content="S.S. Finike Tarımsal Kalkınma Kooperatifi ortaklarının bahçeleri uydu haritasında: toplam alan, ağaç sayısı ve tahmini rekolte.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Quicksand:wght@400..700&family=Merienda:wght@400..800&display=swap">
 <link rel="stylesheet" href="css/main.css?v=24">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="css/uye.css?v=10">
 <script src="js/main.js?v=4" defer></script>
-<script src="js/uye.js?v=5" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 <script src="js/parsel.js?v=6" defer></script>
-<script src="js/yonetim.js?v=5" defer></script>
+<script src="js/ureticiler.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#icerik">İçeriğe geç</a>
 <header class="site-header">
-  <nav class="wrap nav" aria-label="Yönetim menüsü">
+  <nav class="wrap nav" aria-label="Ana menü">
     <a class="brand" href="/" aria-label="S.S. Finike Tarımsal Kalkınma Kooperatifi, ana sayfa">
       <img class="brand-mark" src="/images/icon.png" alt="" width="40" height="40">
-      <span class="brand-text"><strong>Finike Kooperatifi</strong><small>Yönetim Paneli</small></span>
+      <span class="brand-text"><strong>Finike Kooperatifi</strong><small>Tarımsal Kalkınma</small></span>
     </a>
     <ul class="nav-links desktop">
-<li><a href="/yonetim">Ortaklar</a></li>
-<li><a href="/yonetim-parseller">Parseller</a></li>
-<li><a href="/yonetim-mesajlar" class="mesaj-link" aria-current="page">Mesajlar</a></li>
-<li><a href="/ortak">Ortak Paneli</a></li>
-<li><a href="/">Siteye Dön</a></li>
-<li><a href="/giris" class="cikis-link">Çıkış</a></li>
+<li><a href="/">Finike Portakalı</a></li>
+<li><a href="/ureticilerimiz" aria-current="page">Üreticilerimiz</a></li>
+<li><a href="/tarifler">Tarifler</a></li>
+<li><a href="/sosyal">Sosyal Medya</a></li>
+<li><a href="/iletisim">Bize Ulaşın</a></li>
+<li><a href="/lisans">Lisans ve Tescil</a></li>
     </ul>
     <details class="menu">
       <summary aria-label="Menüyü aç">Menü</summary>
       <div class="menu-panel">
         <ul class="nav-links">
-<li><a href="/yonetim">Ortaklar</a></li>
-<li><a href="/yonetim-parseller">Parseller</a></li>
-<li><a href="/yonetim-mesajlar" class="mesaj-link" aria-current="page">Mesajlar</a></li>
-<li><a href="/ortak">Ortak Paneli</a></li>
-<li><a href="/">Siteye Dön</a></li>
-<li><a href="/giris" class="cikis-link">Çıkış</a></li>
+<li><a href="/">Finike Portakalı</a></li>
+<li><a href="/ureticilerimiz" aria-current="page">Üreticilerimiz</a></li>
+<li><a href="/tarifler">Tarifler</a></li>
+<li><a href="/sosyal">Sosyal Medya</a></li>
+<li><a href="/iletisim">Bize Ulaşın</a></li>
+<li><a href="/lisans">Lisans ve Tescil</a></li>
         </ul>
       </div>
     </details>
@@ -52,30 +52,21 @@
 </header>
 <main id="icerik">
 
-<section class="section uye">
+<section class="page-hero">
   <div class="wrap">
-    <p class="muted" id="yukleniyor" role="status">Bilgiler yükleniyor…</p>
-    <div id="mesajlar-sayfa" hidden>
-      <div class="panel-head">
-        <div class="stack" style="gap:6px">
-          <p class="eyebrow">Yönetim</p>
-          <h1>Mesajlar</h1>
-          <p class="muted" id="mesaj-ozet" role="status">İletişim formundan gelen mesajlar.</p>
-        </div>
-        <div class="btn-row">
-          <button class="btn btn-primary" type="button" id="csv-btn">Excel'e aktar</button>
-        </div>
-      </div>
-      <div class="toolbar">
-        <label class="sr-only" for="ara">Mesaj ara</label>
-        <input class="input" id="ara" type="search" placeholder="Ad, e-posta ya da mesajda ara" autocomplete="off">
-        <label class="sr-only" for="okunma-filtre">Okunma durumuna göre süz</label>
-        <select class="select" id="okunma-filtre"><option value="">Bütün mesajlar</option><option value="yeni">Yalnızca okunmamış</option></select>
-        <label class="sr-only" for="konu-filtre">Konuya göre süz</label>
-        <select class="select" id="konu-filtre"><option value="">Bütün konular</option></select>
-      </div>
-      <div class="mesaj-liste" id="mesaj-liste"></div>
-      <p class="muted bos" id="bos" hidden>Gösterilecek mesaj yok.</p>
+    <p class="eyebrow">Bahçelerimiz</p>
+    <h1>Üreticilerimiz ve Bahçeleri</h1>
+    <p class="lede">Finike Portakalı, kooperatif ortaklarımızın kendi bahçelerinde yetişir. Haritadaki kırmızı alanlar ortaklarımızın bildirdiği parsellerdir; sınırlar Tapu ve Kadastro Genel Müdürlüğü kayıtlarından alınmıştır.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:24px">
+  <div class="wrap">
+    <p class="muted" id="yukleniyor" role="status">Harita yükleniyor…</p>
+    <div id="uretici-sayfa" hidden>
+      <div class="kpis" id="ozet" style="margin-top:0"></div>
+      <div class="map map-wide" id="harita" role="region" aria-label="Ortak bahçelerinin uydu haritası"></div>
+      <p class="muted small" style="margin-top:12px">Ortaklarımızın gizliliği için haritada isim ve ada/parsel numarası gösterilmez. Ağaç sayısı ve rekolte, ortakların kendi beyanına dayanan tahminlerdir.</p>
     </div>
   </div>
 </section>
@@ -96,7 +87,7 @@
         <h4>Site</h4>
         <ul>
           <li><a href="/#fark">Neden Finike?</a></li>
-          <li><a href="/ureticilerimiz">Üreticilerimiz</a></li>
+          <li><a href="/ureticilerimiz" aria-current="page">Üreticilerimiz</a></li>
 <li><a href="/tarifler">Tarifler</a></li>
           <li><a href="/sosyal">Sosyal Medya</a></li>
           <li><a href="/iletisim">Bize Ulaşın</a></li>

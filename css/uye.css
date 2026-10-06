@@ -115,3 +115,5 @@
 .mesaj-iletisim{display:flex;gap:12px;flex-wrap:wrap}
 .mesaj-iletisim a{overflow-wrap:anywhere}
 .mesaj-metin{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;max-width:75ch}
+.kpis-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:761px){.kpis-4{grid-template-columns:repeat(4,minmax(0,1fr))}}
