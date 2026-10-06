@@ -9,7 +9,7 @@ import {
 
 const PORT = Number(process.env.PORT || 8787);
 const ALLOWED_ORIGINS = new Set(
-  (process.env.ALLOWED_ORIGINS || "https://finike.leykuph.com").split(",").map((s) => s.trim()).filter(Boolean)
+  (process.env.ALLOWED_ORIGINS || "https://finikekooperatifi.com").split(",").map((s) => s.trim()).filter(Boolean)
 );
 // Cloudflare Tunnel arkasında gerçek istemci IP'si "cf-connecting-ip" başlığındadır.
 // Başlık yalnızca bu değişken ayarlıysa dikkate alınır; doğrudan erişimde taklit edilebilir.

@@ -7,7 +7,7 @@ Ortak girişi iki parçadan oluşur. Hepsi `finike` namespace'inde çalışır:
 | `postgres` | Ortak hesaplarını ve oturumları tutar (PostgreSQL 17, kalıcı disk) |
 | `finike-api` | Giriş, çıkış, oturum ve şifre değiştirme (`api/` klasörü) |
 
-Site (`finike.leykuph.com`) GitHub Pages'te kalır. `giris` ve `ortak` sayfaları API'ye tarayıcıdan bağlanır.
+Site (`finikekooperatifi.com`) GitHub Pages'te kalır. `giris` ve `ortak` sayfaları API'ye tarayıcıdan bağlanır.
 
 ## İlk Kurulum
 
@@ -18,18 +18,19 @@ kubectl apply -f deploy/k8s/finike.yaml
 kubectl -n finike create secret generic finike-db --from-literal=password="$(openssl rand -base64 32)"
 ```
 
-API, Bevel'de `30878` NodePort'undan yayın yapar. Bevel'de zaten çalışan Cloudflare tüneline şu rota eklenir
-(Zero Trust → Networks → Tunnels → Published application routes):
+API `api.finikekooperatifi.com` adresinden yayındadır. `finikekooperatifi.com` ayrı bir Cloudflare hesabında olduğu
+için tüneli kümenin içinde çalışır (`deploy/k8s/cloudflared.yaml`):
 
-- Hostname: `finike-api.leykuph.com`
-- Service: `http://localhost:30878`
+```sh
+kubectl apply -f deploy/k8s/cloudflared.yaml
+kubectl -n finike create secret generic cloudflared --from-literal=token='<TÜNEL JETONU>'
+```
 
-`finikekooperatifi.com` ayrı bir Cloudflare hesabında olduğu için onun tüneli kümenin içinde çalışır
-(`deploy/k8s/cloudflared.yaml`). Rota: `api.finikekooperatifi.com` → `http://finike-api.finike.svc.cluster.local:80`.
-Jeton: `kubectl -n finike create secret generic cloudflared --from-literal=token='<TÜNEL JETONU>'`
+Tünelin rotası (Cloudflare → Zero Trust → Networks → Tunnels → Published application routes):
+`api.finikekooperatifi.com` → `http://finike-api.finike.svc.cluster.local:80`
 
-Tek seviyeli alt alan adı bilerek seçildi: Cloudflare'in ücretsiz sertifikası `*.leykuph.com`'u kapsar,
-`api.finike.leykuph.com` gibi iki seviyeli adları kapsamaz. Adres değişirse `js/uye.js` içindeki `API` değerini güncelleyin.
+Site ile API aynı alan adı altında olmalıdır; oturum çerezi ancak böyle gönderilir. Eski `finike-api.leykuph.com` rotası
+(Bevel'deki tünel, NodePort 30878) yalnızca geçiş dönemi içindir.
 
 ## Ortak Hesapları
 
@@ -86,4 +87,4 @@ Siteyi `http://localhost:8000` adresinden açın. `js/uye.js`, localhost'ta otom
 
 1. Yeni sunucuda aynı `finike.yaml` dosyasını uygulayın ve `finike-db` secret'ını oluşturun.
 2. Bevel'den yedek alıp yeni sunucuya yükleyin: `psql -U finike finike < yedek.sql`
-3. `finike-api.leykuph.com` rotasını yeni sunucudaki bir tünele taşıyın.
+3. Tünel jetonunu yeni sunucudaki `cloudflared` secret'ına yazın ve Bevel'deki `cloudflared`'ı durdurun.

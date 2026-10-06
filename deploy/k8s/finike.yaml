@@ -1,5 +1,6 @@
 # S.S. Finike Tarımsal Kalkınma Kooperatifi: ortak girişi API'si + PostgreSQL
-# API, Bevel'deki Cloudflare tüneline NodePort 30878 üzerinden bağlanır (finike-api.leykuph.com).
+# API iki tünelle yayında: api.finikekooperatifi.com (kümedeki cloudflared, cloudflared.yaml) ve
+# geçiş dönemi için Bevel'deki leykuph.com tüneli üzerinden NodePort 30878 (finike-api.leykuph.com).
 # Veritabanı şifresi bu dosyada değil; deploy/README.md'deki komutla oluşturulur.
 apiVersion: v1
 kind: Namespace
@@ -73,7 +74,7 @@ spec:
             - name: PGPASSWORD
               valueFrom: { secretKeyRef: { name: finike-db, key: password } }
             - { name: ALLOWED_ORIGINS, value: "https://finikekooperatifi.com,https://finike.leykuph.com" }
-            - { name: SITE_URL, value: "https://finike.leykuph.com" }
+            - { name: SITE_URL, value: "https://finikekooperatifi.com" }
             - { name: CLIENT_IP_HEADER, value: cf-connecting-ip }
           ports: [{ containerPort: 8787 }]
           readinessProbe:
