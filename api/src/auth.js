@@ -27,7 +27,7 @@ export async function verifyPassword(password, stored) {
   return timingSafeEqual(key, expected);
 }
 
-// Bilinmeyen ortak numarasında da aynı süre harcansın diye kullanılan sahte özet.
+// Bilinmeyen kullanıcı adında da aynı süre harcansın diye kullanılan sahte özet.
 export const DUMMY_HASH = await hashPassword(randomBytes(16).toString("hex"));
 
 export function newSessionToken() {

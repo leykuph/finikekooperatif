@@ -53,15 +53,15 @@
     <div class="stack uye-intro">
       <p class="eyebrow">Ortaklara Özel</p>
       <h1>Ortak Girişi</h1>
-      <p class="muted">S.S. Finike Tarımsal Kalkınma Kooperatifi ortakları, kooperatiften aldıkları ortak numarası ve şifreyle giriş yapar.</p>
+      <p class="muted">S.S. Finike Tarımsal Kalkınma Kooperatifi ortakları, kooperatiften aldıkları kullanıcı adı ve şifreyle giriş yapar. Kullanıcı adı, soyadınız ile adınızın ilk iki harfinden oluşur (ör. Ahmet Yılmaz için <b>yilmazah</b>).</p>
       <p class="muted">Şifrenizi unuttuysanız ya da henüz hesabınız yoksa kooperatifi arayın; size yeni bir geçici şifre verilir.</p>
     </div>
     <form class="card form-card" id="giris-form" novalidate>
       <h2 style="font-size:var(--fs-lg)">Giriş Yapın</h2>
       <div class="notice bad" id="giris-hata" role="alert" tabindex="-1" hidden></div>
       <div class="field">
-        <label for="ortak-no">Ortak numarası</label>
-        <input class="input" id="ortak-no" name="memberNo" autocomplete="username" autocapitalize="characters" spellcheck="false" required>
+        <label for="ortak-no">Kullanıcı adı</label>
+        <input class="input" id="ortak-no" name="memberNo" autocomplete="username" autocapitalize="none" spellcheck="false" required>
       </div>
       <div class="field">
         <label for="sifre">Şifre</label>

@@ -118,7 +118,7 @@ async function login(req, res) {
     throw new HttpError(429, "Çok fazla hatalı deneme yapıldı. 15 dakika sonra tekrar deneyin.");
   }
   if (!memberNo || !password || password.length > MAX_PASSWORD_LENGTH) {
-    throw new HttpError(400, "Ortak numaranızı ve şifrenizi yazın.");
+    throw new HttpError(400, "Kullanıcı adınızı ve şifrenizi yazın.");
   }
 
   const { rows } = await pool.query(
@@ -131,7 +131,7 @@ async function login(req, res) {
     recordFailure("ip", ip);
     recordFailure("member", memberNo);
     console.warn(`giriş başarısız: ortak=${memberNo} ip=${ip}`);
-    throw new HttpError(401, "Ortak numarası veya şifre hatalı.");
+    throw new HttpError(401, "Kullanıcı adı veya şifre hatalı.");
   }
 
   failures.delete(`member:${memberNo}`);

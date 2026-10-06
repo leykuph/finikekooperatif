@@ -34,10 +34,10 @@ Ortaklar kendileri kayıt olmaz; hesabı kooperatif açar ve geçici şifreyi or
 ```sh
 API="kubectl -n finike exec deploy/finike-api -- node src/cli.js"
 
-$API ekle 12 "Ahmet Yılmaz"   # yeni hesap, geçici şifre verir
-$API sifirla 12               # şifresini unutan ortağa yeni geçici şifre
-$API pasif 12                 # hesabı kapat (ortaklıktan ayrılma vb.)
-$API aktif 12                 # yeniden aç
+$API ekle "Ahmet" "Yılmaz"    # yeni hesap: kullanıcı adı yilmazah + geçici şifre
+$API sifirla yilmazah          # şifresini unutan ortağa yeni geçici şifre
+$API pasif yilmazah            # hesabı kapat (ortaklıktan ayrılma vb.)
+$API aktif yilmazah            # yeniden aç
 $API liste                    # bütün hesaplar
 ```
 
@@ -60,7 +60,7 @@ kubectl -n finike exec statefulset/postgres -- pg_dump -U finike finike > finike
 
 ```sh
 cd api && docker compose up --build        # API: http://localhost:8787
-docker compose exec api node src/cli.js ekle 1 "Deneme Ortak"
+docker compose exec api node src/cli.js ekle "Deneme" "Ortak"
 ```
 
 Siteyi `http://localhost:8000` adresinden açın. `js/uye.js`, localhost'ta otomatik olarak yerel API'yi kullanır.

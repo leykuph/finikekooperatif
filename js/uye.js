@@ -30,7 +30,7 @@
     login.addEventListener("submit", function(e){
       e.preventDefault();
       var no = login.elements.memberNo.value.trim(), pw = login.elements.password.value;
-      if (!no || !pw) { show(err, "Ortak numaranızı ve şifrenizi yazın.", "bad"); return; }
+      if (!no || !pw) { show(err, "Kullanıcı adınızı ve şifrenizi yazın.", "bad"); return; }
       err.hidden = true; busy(btn, true, "Giriş yapılıyor…");
       api("POST", "/auth/login", {memberNo: no, password: pw}).then(function(d){
         if (d.member) { location.href = d.member.mustChangePassword ? "/ortak#sifre" : "/ortak"; return; }
