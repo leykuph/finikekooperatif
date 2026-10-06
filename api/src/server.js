@@ -21,6 +21,13 @@ const MAX_BODY = 10 * 1024;
 const TKGM_LOOKUPS_PER_HOUR = 60;
 const MAX_PARCELS_PER_MEMBER = 200;
 const MAX_TREE_GROUPS_PER_PARCEL = 50;
+const CONTACT_PER_IP_PER_HOUR = 5;
+const CONTACT_PER_DAY = 300;
+// iletisim.html'deki konu seçenekleriyle aynı olmalı
+const CONTACT_TOPICS = [
+  "Sipariş ve kargo", "Toplu / Kurumsal alım", "Ağaç sahiplenme", "Hasat gönüllülüğü",
+  "Tarif gönderme", 'Sahte "Finike" ürünü bildirimi', "Basın", "Diğer",
+];
 
 // ---------- Deneme sınırı (bellek içi; tek kopya çalıştığı için yeterli) ----------
 const WINDOW_MS = 15 * 60 * 1000;
@@ -45,8 +52,25 @@ function countLookup(memberId) {
   if (++e.count > TKGM_LOOKUPS_PER_HOUR) throw new HttpError(429, "Bir saat içinde çok fazla parsel sorguladınız. Biraz sonra tekrar deneyin.");
 }
 
+// İletişim formu: IP başına saatlik ve toplam günlük sınır (istenmeyen mesaj seline karşı)
+const contactHits = new Map();
+let contactDay = { count: 0, resetAt: 0 };
+function countContact(ip) {
+  const now = Date.now();
+  if (contactDay.resetAt <= now) contactDay = { count: 0, resetAt: now + 24 * 60 * 60 * 1000 };
+  const e = contactHits.get(ip);
+  if (e && e.resetAt > now && e.count >= CONTACT_PER_IP_PER_HOUR) {
+    throw new HttpError(429, "Kısa sürede çok fazla mesaj gönderildi. Biraz sonra tekrar deneyin ya da e-posta ile yazın.");
+  }
+  if (contactDay.count >= CONTACT_PER_DAY) throw new HttpError(429, "Şu anda mesaj alınamıyor. Lütfen e-posta ile yazın.");
+  if (!e || e.resetAt <= now) contactHits.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 });
+  else e.count++;
+  contactDay.count++;
+}
+
 setInterval(() => {
   const now = Date.now();
+  for (const [k, e] of contactHits) if (e.resetAt <= now) contactHits.delete(k);
   for (const [k, e] of lookups) if (e.resetAt <= now) lookups.delete(k);
   for (const [k, e] of failures) if (e.resetAt <= now) failures.delete(k);
 }, 60 * 1000).unref();
@@ -432,6 +456,74 @@ async function setActive(req, res, username) {
   send(res, 200, { ok: true });
 }
 
+// ---------- İletişim formu ----------
+function contactInput(o) {
+  const str = (v) => (typeof v === "string" ? v.trim() : "");
+  const name = str(o.ad).replace(/\s+/g, " "), email = str(o.eposta), phone = str(o.telefon), topic = str(o.konu);
+  const message = str(o.mesaj).replace(/\r\n/g, "\n");
+  const digits = phone.replace(/\D/g, "");
+  if (name.split(" ").length < 2 || name.length > 80) throw new HttpError(400, "Adınızı ve soyadınızı yazın.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 120) throw new HttpError(400, "Geçerli bir e-posta adresi yazın.");
+  if (phone && !(digits.length === 10 || digits.length === 11 || (digits.length === 12 && digits.startsWith("90")))) {
+    throw new HttpError(400, "Telefon numarası 10 veya 11 haneli olmalı.");
+  }
+  if (!CONTACT_TOPICS.includes(topic)) throw new HttpError(400, "Mesajınızın konusunu seçin.");
+  if (message.length < 20 || message.length > 1500) throw new HttpError(400, "Mesajınız 20 ile 1500 karakter arasında olmalı.");
+  if (o.kvkk !== "on" && o.kvkk !== true) throw new HttpError(400, "Devam etmek için aydınlatma metnini onaylayın.");
+  return { name, email, phone: phone || null, topic, message };
+}
+
+async function contact(req, res) {
+  const body = await readJson(req);
+  // Gizli "web" alanını yalnızca botlar doldurur; başarılı görünür ama kaydedilmez.
+  if (typeof body.web === "string" && body.web.trim()) return send(res, 201, { ok: true });
+  const m = contactInput(body);
+  countContact(clientIp(req));
+  await pool.query(
+    "INSERT INTO contact_messages (name, email, phone, topic, message) VALUES ($1, $2, $3, $4, $5)",
+    [m.name, m.email, m.phone, m.topic, m.message]
+  );
+  console.info(`iletişim mesajı: konu=${m.topic}`);
+  send(res, 201, { ok: true });
+}
+
+async function listMessages(req, res) {
+  await requireMember(req, { admin: true });
+  const { rows } = await pool.query(
+    `SELECT c.*, m.full_name AS read_by_name FROM contact_messages c LEFT JOIN members m ON m.id = c.read_by
+      ORDER BY c.created_at DESC LIMIT 1000`
+  );
+  send(res, 200, {
+    messages: rows.map((r) => ({
+      id: Number(r.id), name: r.name, email: r.email, phone: r.phone, topic: r.topic, message: r.message,
+      createdAt: r.created_at, readAt: r.read_at, readBy: r.read_by_name,
+    })),
+  });
+}
+
+async function unreadMessages(req, res) {
+  await requireMember(req, { admin: true });
+  const { rows: [{ count }] } = await pool.query("SELECT count(*)::int AS count FROM contact_messages WHERE read_at IS NULL");
+  send(res, 200, { count });
+}
+
+async function markMessage(req, res, id) {
+  const member = await requireMember(req, { admin: true });
+  const read = (await readJson(req)).read !== false;
+  const { rowCount } = read
+    ? await pool.query("UPDATE contact_messages SET read_at = now(), read_by = $2 WHERE id = $1", [id, member.id])
+    : await pool.query("UPDATE contact_messages SET read_at = NULL, read_by = NULL WHERE id = $1", [id]);
+  if (!rowCount) throw new HttpError(404, "Mesaj bulunamadı.");
+  send(res, 200, { ok: true });
+}
+
+async function deleteMessage(req, res, id) {
+  await requireMember(req, { admin: true });
+  const { rowCount } = await pool.query("DELETE FROM contact_messages WHERE id = $1", [id]);
+  if (!rowCount) throw new HttpError(404, "Mesaj bulunamadı.");
+  send(res, 200, { ok: true });
+}
+
 async function health(req, res) {
   await pool.query("SELECT 1");
   send(res, 200, { ok: true });
@@ -445,6 +537,9 @@ const routes = {
   "POST /parcels": addParcel,
   "GET /admin/parcels": allParcels,
   "GET /admin/members": listMembers,
+  "GET /admin/messages": listMessages,
+  "GET /admin/messages/unread": unreadMessages,
+  "POST /contact": contact,
   "POST /admin/members": addMember,
   "GET /auth/me": me,
   "POST /auth/login": login,
@@ -478,8 +573,11 @@ const server = http.createServer(async (req, res) => {
   const del = req.method === "DELETE" && path.match(/^\/(parcels|trees)\/(\d+)$/);
   const addT = req.method === "POST" && path.match(/^\/parcels\/(\d+)\/trees$/);
   const act = req.method === "POST" && path.match(/^\/admin\/members\/([a-z0-9]+)\/(reset|active)$/);
+  const msg = path.match(/^\/admin\/messages\/(\d+)(\/read)?$/);
+  const msgHandler = msg && (req.method === "POST" && msg[2] ? markMessage : req.method === "DELETE" && !msg[2] ? deleteMessage : null);
   const handler = del ? (rq, rs) => (del[1] === "parcels" ? removeParcel : removeTrees)(rq, rs, Number(del[2]))
     : addT ? (rq, rs) => addTrees(rq, rs, Number(addT[1]))
+    : msgHandler ? (rq, rs) => msgHandler(rq, rs, Number(msg[1]))
     : act ? (rq, rs) => (act[2] === "reset" ? resetMemberPassword : setActive)(rq, rs, act[1])
     : routes[`${req.method} ${path}`];
   if (!handler) return send(res, 404, { error: "Bulunamadı." });

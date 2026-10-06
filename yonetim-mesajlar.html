@@ -6,57 +6,77 @@
 <link rel="icon" href="/icon.png" type="image/png" sizes="160x160">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<title>Sayfa Bulunamadı · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
-<meta name="description" content="Aradığınız sayfa bulunamadı.">
+<title>Mesajlar · Yönetim · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
+<meta name="description" content="S.S. Finike Tarımsal Kalkınma Kooperatifi yönetim paneli: iletişim formundan gelen mesajlar.">
+<meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Quicksand:wght@400..700&family=Merienda:wght@400..800&display=swap">
-<link rel="stylesheet" href="/css/main.css?v=23">
-<link rel="stylesheet" href="/css/404.css">
-<script src="/js/main.js?v=3" defer></script>
+<link rel="stylesheet" href="css/main.css?v=23">
+<link rel="stylesheet" href="css/uye.css?v=9">
+<script src="js/main.js?v=3" defer></script>
+<script src="js/uye.js?v=5" defer></script>
+<script src="js/parsel.js?v=6" defer></script>
+<script src="js/yonetim.js?v=5" defer></script>
 </head>
 <body>
 <a class="skip" href="#icerik">İçeriğe geç</a>
 <header class="site-header">
-  <nav class="wrap nav" aria-label="Ana menü">
+  <nav class="wrap nav" aria-label="Yönetim menüsü">
     <a class="brand" href="/" aria-label="S.S. Finike Tarımsal Kalkınma Kooperatifi, ana sayfa">
       <img class="brand-mark" src="/images/icon.png" alt="" width="40" height="40">
-      <span class="brand-text"><strong>Finike Kooperatifi</strong><small>Tarımsal Kalkınma</small></span>
+      <span class="brand-text"><strong>Finike Kooperatifi</strong><small>Yönetim Paneli</small></span>
     </a>
     <ul class="nav-links desktop">
-<li><a href="/">Finike Portakalı</a></li>
-<li><a href="/tarifler">Tarifler</a></li>
-<li><a href="/sosyal">Sosyal Medya</a></li>
-<li><a href="/iletisim">Bize Ulaşın</a></li>
-<li><a href="/lisans">Lisans ve Tescil</a></li>
+<li><a href="/yonetim">Ortaklar</a></li>
+<li><a href="/yonetim-parseller">Parseller</a></li>
+<li><a href="/yonetim-mesajlar" class="mesaj-link" aria-current="page">Mesajlar</a></li>
+<li><a href="/ortak">Ortak Paneli</a></li>
+<li><a href="/">Siteye Dön</a></li>
+<li><a href="/giris" class="cikis-link">Çıkış</a></li>
     </ul>
     <details class="menu">
       <summary aria-label="Menüyü aç">Menü</summary>
       <div class="menu-panel">
         <ul class="nav-links">
-<li><a href="/">Finike Portakalı</a></li>
-<li><a href="/tarifler">Tarifler</a></li>
-<li><a href="/sosyal">Sosyal Medya</a></li>
-<li><a href="/iletisim">Bize Ulaşın</a></li>
-<li><a href="/lisans">Lisans ve Tescil</a></li>
+<li><a href="/yonetim">Ortaklar</a></li>
+<li><a href="/yonetim-parseller">Parseller</a></li>
+<li><a href="/yonetim-mesajlar" class="mesaj-link" aria-current="page">Mesajlar</a></li>
+<li><a href="/ortak">Ortak Paneli</a></li>
+<li><a href="/">Siteye Dön</a></li>
+<li><a href="/giris" class="cikis-link">Çıkış</a></li>
         </ul>
       </div>
     </details>
   </nav>
 </header>
 <main id="icerik">
-<section class="wrap nf">
-  <div class="branch" role="img" aria-label="Meyvesi toplanmış boş bir dal"></div>
-  <div class="stack" style="gap:16px;max-width:56ch">
-    <p class="code">404</p>
-    <h1 style="font-size:var(--fs-xl)">Bu Dal Boş, Meyvesi Çoktan Toplanmış</h1>
-    <p class="muted">Aradığınız sayfa taşınmış, adı değişmiş ya da hiç var olmamış olabilir. Adresi kontrol edin veya aşağıdaki sayfalardan devam edin.</p>
-    <div class="btn-row"><a class="btn btn-primary" href="/">Ana sayfaya dön</a><a class="btn btn-ghost" href="/iletisim">Sorunu bildir</a></div>
-    <ul>
-      <li><a class="chip" href="/tarifler" style="text-decoration:none;display:inline-block">Tarifler</a></li>
-      <li><a class="chip" href="/sosyal" style="text-decoration:none;display:inline-block">Sosyal Medya</a></li>
-      <li><a class="chip" href="/lisans" style="text-decoration:none;display:inline-block">Lisans ve Tescil</a></li>
-    </ul>
+
+<section class="section uye">
+  <div class="wrap">
+    <p class="muted" id="yukleniyor" role="status">Bilgiler yükleniyor…</p>
+    <div id="mesajlar-sayfa" hidden>
+      <div class="panel-head">
+        <div class="stack" style="gap:6px">
+          <p class="eyebrow">Yönetim</p>
+          <h1>Mesajlar</h1>
+          <p class="muted" id="mesaj-ozet" role="status">İletişim formundan gelen mesajlar.</p>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" type="button" id="csv-btn">Excel'e aktar</button>
+        </div>
+      </div>
+      <div class="toolbar">
+        <label class="sr-only" for="ara">Mesaj ara</label>
+        <input class="input" id="ara" type="search" placeholder="Ad, e-posta ya da mesajda ara" autocomplete="off">
+        <label class="sr-only" for="okunma-filtre">Okunma durumuna göre süz</label>
+        <select class="select" id="okunma-filtre"><option value="">Bütün mesajlar</option><option value="yeni">Yalnızca okunmamış</option></select>
+        <label class="sr-only" for="konu-filtre">Konuya göre süz</label>
+        <select class="select" id="konu-filtre"><option value="">Bütün konular</option></select>
+      </div>
+      <div class="mesaj-liste" id="mesaj-liste"></div>
+      <p class="muted bos" id="bos" hidden>Gösterilecek mesaj yok.</p>
+    </div>
   </div>
 </section>
 

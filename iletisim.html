@@ -13,8 +13,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Quicksand:wght@400..700&family=Merienda:wght@400..800&display=swap">
 <link rel="stylesheet" href="css/main.css?v=23">
 <link rel="stylesheet" href="css/iletisim.css">
-<script src="js/main.js?v=2" defer></script>
-<script src="js/iletisim.js" defer></script>
+<script src="js/main.js?v=3" defer></script>
+<script src="js/iletisim.js?v=2" defer></script>
 </head>
 <body>
 <a class="skip" href="#icerik">İçeriğe geç</a>
@@ -98,6 +98,10 @@
           <span class="err" id="konu-err">Mesajınızın konusunu seçin.</span>
         </div>
       </div>
+      <!-- Bot tuzağı: insanlar görmez, doldurulursa mesaj kaydedilmez -->
+      <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+        <label for="web">Web sitesi</label><input id="web" name="web" tabindex="-1" autocomplete="off">
+      </div>
       <div class="field" data-field="mesaj">
         <label for="mesaj">Mesajınız *</label>
         <textarea class="textarea" id="mesaj" name="mesaj" maxlength="1500" required aria-describedby="mesaj-err mesaj-count"></textarea>
@@ -116,14 +120,13 @@
       <div class="card">
         <h2 style="font-size:var(--fs-lg)">İletişim Bilgileri</h2>
         <dl>
-          <div><dt>Adres</dt><dd>[Mahalle, cadde, no] · Finike / Antalya 07740</dd></div>
-          <div><dt>E-posta</dt><dd><span id="mail">info@[alanadi].com.tr</span><button class="copy" type="button" data-copy="mail">Kopyala</button></dd></div>
-          <div><dt>Telefon</dt><dd><span id="tel">+90 242 [xxx xx xx]</span><button class="copy" type="button" data-copy="tel">Kopyala</button></dd></div>
+          <div><dt>Adres</dt><dd><address style="font-style:normal">İskele Mahallesi, Yayla Bulvarı No:42/2<br>Finike Ziraat Odası<br>07740 Finike / Antalya</address></dd></div>
+          <div><dt>E-posta</dt><dd><a id="mail" href="mailto:info@finikekooperatifi.com">info@finikekooperatifi.com</a><button class="copy" type="button" data-copy="mail">Kopyala</button></dd></div>
           <div><dt>Çalışma saatleri</dt><dd>Hafta içi 08.30-17.30</dd></div>
         </dl>
       </div>
       <div class="ph ph-hills map" role="img" aria-label="Görsel alanı: Finike'de kooperatif tesisinin konumu"><span class="ph-label">Harita görseli</span></div>
-      <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Finike%2C%20Antalya" target="_blank" rel="noopener">Haritada aç</a>
+      <a class="btn btn-ghost" href="https://www.google.com/maps/search/?api=1&query=Finike%20Ziraat%20Odas%C4%B1%2C%20Yayla%20Bulvar%C4%B1%2042%2C%20%C4%B0skele%2C%20Finike%2C%20Antalya" target="_blank" rel="noopener">Haritada aç</a>
     </aside>
   </div>
 </section>

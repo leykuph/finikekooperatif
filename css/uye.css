@@ -104,3 +104,14 @@
 .agac-ekle:hover{background:color-mix(in srgb,var(--orange) 16%,transparent)}
 .agac-ekle:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
 .map.yakin .parsel-pin{opacity:0;pointer-events:none}
+
+/* ---------- Yönetim > Mesajlar ---------- */
+.sayac{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--orange-ink);color:#fff;font-size:12px;font-weight:800;line-height:1;vertical-align:1px}
+.mesaj-liste{display:grid;gap:14px}
+.mesaj-kart{gap:12px}
+.mesaj-kart.yeni{border-left:4px solid var(--orange-ink)}
+.mesaj-ust{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mesaj-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mesaj-iletisim{display:flex;gap:12px;flex-wrap:wrap}
+.mesaj-iletisim a{overflow-wrap:anywhere}
+.mesaj-metin{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;max-width:75ch}

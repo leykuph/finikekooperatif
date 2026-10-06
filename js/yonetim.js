@@ -1,4 +1,4 @@
-/* Yönetim paneli: Ortaklar (/yonetim) ve Parseller (/yonetim-parseller). Yalnızca yönetici hesapları. */
+/* Yönetim paneli: Ortaklar (/yonetim), Parseller (/yonetim-parseller) ve Mesajlar (/yonetim-mesajlar). Yalnızca yönetici hesapları. */
 (function(){
   var api = window.uyeApi, P = window.Parsel, el = P.el, dekar = P.dekar, label = P.label, show = P.show;
   var loading = document.getElementById("yukleniyor");
@@ -79,7 +79,20 @@
       if (!d.member) { location.replace("/giris"); return; }
       if (!d.member.isAdmin || d.member.mustChangePassword) { location.replace("/ortak"); return; }
       load(d.member);
+      unreadBadge();
     }).catch(function(){ loading.textContent = window.uyeNetErr; });
+  }
+
+  // Menüdeki "Mesajlar" bağlantısında okunmamış mesaj sayısı
+  function unreadBadge(){
+    api("GET", "/admin/messages/unread").then(function(d){
+      document.querySelectorAll(".mesaj-link").forEach(function(a){
+        var b = a.querySelector(".sayac");
+        if (!d.count) { if (b) b.remove(); return; }
+        if (!b) { b = el("span", {"class": "sayac"}); a.appendChild(b); }
+        b.textContent = d.count; b.setAttribute("aria-label", d.count + " okunmamış");
+      });
+    }).catch(function(){});
   }
 
   /* ---------- Ortaklar ---------- */
@@ -332,6 +345,96 @@
           tt.count, tonsCell(tt.tons), treesCell(x.p.trees)]);
       });
       downloadCsv("ortak-parselleri", rows);
+    });
+  }
+
+  /* ---------- Mesajlar ---------- */
+  var messagesRoot = document.getElementById("mesajlar-sayfa");
+  if (messagesRoot) {
+    var messages = [], search3 = document.getElementById("ara"), readSel = document.getElementById("okunma-filtre"), topicSel = document.getElementById("konu-filtre");
+    var list = document.getElementById("mesaj-liste"), empty3 = document.getElementById("bos"), me3 = null;
+
+    guard(function(self){
+      me3 = self;
+      api("GET", "/admin/messages").then(function(d){
+        if (!d.messages) { loading.textContent = d.error || window.uyeNetErr; return; }
+        messages = d.messages; loading.hidden = true; messagesRoot.hidden = false;
+        var topics = {};
+        messages.forEach(function(m){ topics[m.topic] = 1; });
+        Object.keys(topics).sort(function(a, b){ return a.localeCompare(b, "tr"); })
+          .forEach(function(t){ topicSel.appendChild(el("option", {value: t, text: t})); });
+        render3();
+      }).catch(function(){ loading.textContent = window.uyeNetErr; });
+    });
+
+    function visible3(){
+      var q = fold(search3.value.trim()), rd = readSel.value, tp = topicSel.value;
+      return messages.filter(function(m){
+        if (rd === "yeni" && m.readAt) return false;
+        if (tp && m.topic !== tp) return false;
+        return !q || [m.name, m.email, m.phone, m.message].some(function(s){ return fold(s).indexOf(q) >= 0; });
+      });
+    }
+
+    function render3(){
+      var unread = messages.filter(function(m){ return !m.readAt; }).length;
+      document.getElementById("mesaj-ozet").textContent = messages.length
+        ? messages.length + " mesaj" + (unread ? " · " + unread + " okunmamış" : " · hepsi okundu")
+        : "İletişim formundan henüz mesaj gelmedi.";
+      var rows = visible3();
+      list.textContent = "";
+      rows.forEach(function(m){ list.appendChild(card(m)); });
+      empty3.hidden = rows.length > 0 || !messages.length;
+      unreadBadge();
+    }
+    search3.addEventListener("input", render3);
+    [readSel, topicSel].forEach(function(i){ i.addEventListener("change", render3); });
+
+    function card(m){
+      var reply = el("a", {"class": "btn btn-primary btn-sm", text: "E-postayla yanıtla",
+        href: "mailto:" + m.email + "?subject=" + encodeURIComponent("Re: " + m.topic + " · Finike Kooperatifi")});
+      var toggle = el("button", {"class": "btn btn-ghost btn-sm", type: "button", text: m.readAt ? "Okunmadı yap" : "Okundu işaretle"});
+      var del = el("button", {"class": "btn btn-ghost btn-sm danger", type: "button", text: "Sil"});
+      reply.addEventListener("click", function(){ if (!m.readAt) setRead(m, true); });
+      toggle.addEventListener("click", function(){ setRead(m, !m.readAt); });
+      del.addEventListener("click", function(){
+        if (!confirm(m.name + " adlı kişinin mesajı kalıcı olarak silinsin mi?")) return;
+        api("DELETE", "/admin/messages/" + m.id).then(function(d){
+          if (!d.ok) { alert(d.error || window.uyeNetErr); return; }
+          messages = messages.filter(function(x){ return x !== m; }); render3();
+        }).catch(function(){ alert(window.uyeNetErr); });
+      });
+      var contact = [el("a", {href: "mailto:" + m.email, text: m.email})];
+      if (m.phone) contact.push(el("a", {href: "tel:" + m.phone.replace(/[^\d+]/g, ""), text: m.phone}));
+      return el("article", {"class": "card mesaj-kart" + (m.readAt ? "" : " yeni")}, [
+        el("div", {"class": "mesaj-ust"}, [
+          el("div", {"class": "stack", style: "gap:2px"}, [
+            el("strong", {text: m.name}),
+            el("span", {"class": "mesaj-iletisim small"}, contact)
+          ]),
+          el("div", {"class": "mesaj-meta"}, [
+            m.readAt ? null : el("span", {"class": "durum durum-ilk-giris", text: "Yeni"}),
+            el("span", {"class": "etiket", text: m.topic}),
+            el("time", {"class": "muted small", datetime: m.createdAt, text: date(m.createdAt, true)})
+          ])
+        ]),
+        el("p", {"class": "mesaj-metin", text: m.message}),
+        m.readAt ? el("p", {"class": "muted small", text: "Okuyan: " + (m.readBy || "-") + " · " + date(m.readAt, true)}) : null,
+        el("div", {"class": "btn-row"}, [reply, toggle, del])
+      ]);
+    }
+
+    function setRead(m, read){
+      api("POST", "/admin/messages/" + m.id + "/read", {read: read}).then(function(d){
+        if (!d.ok) { alert(d.error || window.uyeNetErr); return; }
+        m.readAt = read ? new Date().toISOString() : null; m.readBy = read && me3 ? me3.fullName : null; render3();
+      }).catch(function(){ alert(window.uyeNetErr); });
+    }
+
+    document.getElementById("csv-btn").addEventListener("click", function(){
+      var rows = [["Tarih", "Ad Soyad", "E-posta", "Telefon", "Konu", "Mesaj", "Okundu"]];
+      visible3().forEach(function(m){ rows.push([date(m.createdAt, true), m.name, m.email, m.phone || "", m.topic, m.message, m.readAt ? date(m.readAt, true) : ""]); });
+      downloadCsv("mesajlar", rows);
     });
   }
 })();

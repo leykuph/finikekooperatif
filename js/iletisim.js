@@ -33,13 +33,12 @@
     summary.hidden=true;
     var btn=document.getElementById("send"); btn.disabled=true; btn.textContent="Gönderiliyor…";
     var done=function(text,cls){ok.className="notice "+cls;ok.textContent=text;ok.hidden=false;btn.disabled=false;btn.textContent="Mesajı gönder";};
-    if(window.FORM_ENDPOINT){
-      fetch(window.FORM_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(new FormData(form)))})
-        .then(function(r){ if(!r.ok) throw 0; form.reset(); cnt.textContent="0 / 1500"; done("Mesajınız ulaştı. İki iş günü içinde dönüş yapacağız.","ok"); })
-        .catch(function(){ done("Mesaj gönderilemedi. Bağlantınızı kontrol edip tekrar deneyin ya da e-posta adresimize yazın.","bad"); });
-    } else {
-      setTimeout(function(){done("Form eksiksiz. Sunucu bağlantısı yapıldığında bu mesaj kooperatife iletilecek.","ok");},400);
-    }
+    fetch(window.API_BASE+"/contact",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(Object.fromEntries(new FormData(form)))})
+      .then(function(r){ return r.json().catch(function(){return {};}).then(function(d){
+        if(!r.ok){ done((d.error||"Mesaj gönderilemedi.")+" Dilerseniz info@finikekooperatifi.com adresine e-posta ile yazın.","bad"); return; }
+        form.reset(); cnt.textContent="0 / 1500"; done("Mesajınız ulaştı. İki iş günü içinde dönüş yapacağız.","ok");
+      }); })
+      .catch(function(){ done("Mesaj gönderilemedi. Bağlantınızı kontrol edip tekrar deneyin ya da info@finikekooperatifi.com adresine e-posta ile yazın.","bad"); });
   });
   document.querySelectorAll(".copy").forEach(function(b){b.addEventListener("click",function(){
     var el=document.getElementById(b.dataset.copy), t=el.textContent;
