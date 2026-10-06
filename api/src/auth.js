@@ -51,10 +51,16 @@ export function isValidTc(tc) {
   return d.slice(0, 10).reduce((a, b) => a + b, 0) % 10 === d[10];
 }
 
+// "0532 111 45 67", "+90 532..." -> "5321114567"; cep numarası değilse null
+export function mobileDigits(phone) {
+  const d = String(phone ?? "").replace(/\D/g, "").replace(/^(90|0)/, "");
+  return /^5\d{9}$/.test(d) ? d : null;
+}
+
 export function initialPassword(tc, phone) {
   tc = String(tc ?? "").replace(/\s/g, "");
-  const digits = String(phone ?? "").replace(/\D/g, "").replace(/^(90|0)/, "");
+  const mobile = mobileDigits(phone);
   if (!isValidTc(tc)) throw new Error("TC kimlik numarası geçersiz. 11 haneyi kontrol edin.");
-  if (!/^5\d{9}$/.test(digits)) throw new Error("Cep telefonu 5xx xxx xx xx biçiminde olmalı.");
-  return tc + digits.slice(-4);
+  if (!mobile) throw new Error("Cep telefonu 5xx xxx xx xx biçiminde olmalı.");
+  return tc + mobile.slice(-4);
 }

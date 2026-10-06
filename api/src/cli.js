@@ -1,8 +1,9 @@
 // Ortak hesaplarını yönetme komutları. Sunucuda:
 //   kubectl -n finike exec deploy/finike-api -- node src/cli.js <komut> ...
 import { pool, migrate, normalizeMemberNo, usernameCandidates } from "./db.js";
-import { createInterface } from "node:readline/promises";
-import { INITIAL_PASSWORD_DAYS, INITIAL_PASSWORD_MAX_FAILURES, hashPassword, initialPassword } from "./auth.js";
+import {
+  INITIAL_PASSWORD_DAYS, INITIAL_PASSWORD_MAX_FAILURES, hashPassword, initialPassword, isValidTc, mobileDigits,
+} from "./auth.js";
 
 const USAGE = `Kullanım:
   node src/cli.js ekle "<Ad>" "<Soyad>"           Yeni ortak hesabı açar; TC ve telefonu sorar
@@ -39,16 +40,47 @@ Kullanıcı adı : ${memberNo}
 ---------------------------------------------------------------`);
 }
 
+// Yalnızca rakam kabul eden, en fazla `max` hane yazdıran alan: "TC kimlik no : 1234567____  7/11"
+function readDigits(label, max) {
+  return new Promise((resolve) => {
+    let value = "";
+    const draw = () => process.stdout.write(`\r\x1b[2K${label}${value}${"_".repeat(max - value.length)}  ${value.length}/${max}`);
+    const done = (result) => {
+      process.stdin.setRawMode(false); process.stdin.pause(); process.stdin.off("data", onData);
+      process.stdout.write("\n"); resolve(result);
+    };
+    const onData = (buf) => {
+      for (const ch of buf.toString("utf8")) {
+        if (ch === "\u0003") { done(null); process.exit(130); }        // Ctrl+C
+        if (ch === "\r" || ch === "\n") { if (value) return done(value); continue; }
+        if (ch === "\u007f" || ch === "\b") value = value.slice(0, -1);   // Backspace
+        else if (/[0-9]/.test(ch) && value.length < max) value += ch;    // harf, boşluk ve fazla hane yok sayılır
+      }
+      draw();
+    };
+    process.stdin.setRawMode(true); process.stdin.resume(); process.stdin.on("data", onData);
+    draw();
+  });
+}
+
+async function askUntilValid(label, max, check, error) {
+  for (let i = 0; i < 3; i++) {
+    const v = await readDigits(label, max);
+    if (check(v)) return v;
+    console.log(`  ${error}`);
+  }
+  throw new Error("Üç kez hatalı girildi, işlem iptal edildi.");
+}
+
 // TC ve telefon komut satırında verilmezse sorulur; böylece kabuk geçmişine yazılmaz.
 async function askInitialPassword(tcArg, phoneArg) {
   let tc = tcArg, phone = phoneArg;
   if (!tc || !phone) {
     if (!process.stdin.isTTY) throw new Error('TC ve telefon için komutu "kubectl exec -it" ile çalıştırın.');
-    const rl = createInterface({ input: process.stdin, output: process.stdout });
-    try {
-      if (!tc) tc = await rl.question("TC kimlik no : ");
-      if (!phone) phone = await rl.question("Cep telefonu : ");
-    } finally { rl.close(); }
+    if (!tc) tc = await askUntilValid("TC kimlik no : ", 11, isValidTc,
+      "Geçersiz TC kimlik numarası (11 hane olmalı ve son iki hane kontrol hanesiyle uyuşmalı). Tekrar yazın.");
+    if (!phone) phone = await askUntilValid("Cep telefonu : ", 11, (v) => mobileDigits(v) !== null,
+      "Cep telefonu 05xx xxx xx xx ya da 5xx xxx xx xx olmalı. Tekrar yazın.");
   }
   return initialPassword(tc, phone);
 }
