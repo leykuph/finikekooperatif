@@ -1,0 +1,34 @@
+# finikekooperatifi.com Cloudflare hesabının tüneli (Bevel'deki leykuph.com tünelinden ayrı).
+# Jeton bu dosyada değil:
+#   kubectl -n finike create secret generic cloudflared --from-literal=token='<TÜNEL JETONU>'
+# Tünelin rotası (Cloudflare panelinde): api.finikekooperatifi.com -> http://finike-api.finike.svc.cluster.local:80
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: finike
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: cloudflared } }
+  template:
+    metadata: { labels: { app: cloudflared } }
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          args: ["tunnel", "--no-autoupdate", "--metrics", "0.0.0.0:2000", "run"]
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom: { secretKeyRef: { name: cloudflared, key: token } }
+          livenessProbe:
+            httpGet: { path: /ready, port: 2000 }
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests: { cpu: 20m, memory: 32Mi }
+            limits: { memory: 128Mi }
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532  # imajdaki "nonroot" kullanıcısı
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true

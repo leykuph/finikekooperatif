@@ -24,6 +24,10 @@ API, Bevel'de `30878` NodePort'undan yayın yapar. Bevel'de zaten çalışan Clo
 - Hostname: `finike-api.leykuph.com`
 - Service: `http://localhost:30878`
 
+`finikekooperatifi.com` ayrı bir Cloudflare hesabında olduğu için onun tüneli kümenin içinde çalışır
+(`deploy/k8s/cloudflared.yaml`). Rota: `api.finikekooperatifi.com` → `http://finike-api.finike.svc.cluster.local:80`.
+Jeton: `kubectl -n finike create secret generic cloudflared --from-literal=token='<TÜNEL JETONU>'`
+
 Tek seviyeli alt alan adı bilerek seçildi: Cloudflare'in ücretsiz sertifikası `*.leykuph.com`'u kapsar,
 `api.finike.leykuph.com` gibi iki seviyeli adları kapsamaz. Adres değişirse `js/uye.js` içindeki `API` değerini güncelleyin.
 
