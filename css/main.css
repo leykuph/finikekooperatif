@@ -178,12 +178,7 @@ a:hover{text-decoration-thickness:2px}
 .site-footer .brand{color:#fff!important}
 .site-footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:var(--fs-sm)}
 .footer-bottom{border-top:1px dashed rgba(216,227,217,.25);margin-top:56px;padding-top:20px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:var(--fs-xs);color:var(--footer-muted)}
-.news{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.news input{flex:1 1 180px;min-width:0;padding:11px 14px;border-radius:var(--radius-sm);border:1px solid rgba(216,227,217,.3);background:rgba(0,0,0,.25);color:#fff;font:inherit;font-size:var(--fs-sm)}
-.news input::placeholder{color:#9FB3A4}
-.news .btn{background:var(--orange);color:#1A1208;border-color:var(--orange)}
-.news .btn:hover{box-shadow:3px 3px 0 var(--footer-ink)}
-.news-msg{font-size:var(--fs-xs);margin-top:8px;min-height:1.2em;color:var(--footer-accent)}
+.footer-adres{font-style:normal;font-size:.9375rem;line-height:1.6;margin-bottom:12px}
 
 /* ---------- Form (default + hata durumu) ---------- */
 .field{display:grid;gap:6px;min-width:0;align-content:start}
