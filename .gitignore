@@ -10,3 +10,6 @@ __pycache__/
 
 # Tasarım aracı ürün notları (yalnızca yerel)
 PRODUCT.md
+
+# API bağımlılıkları
+api/node_modules/

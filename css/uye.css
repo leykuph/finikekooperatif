@@ -1,0 +1,14 @@
+.uye{padding-top:clamp(40px,6vw,80px)}
+.uye-wrap{display:grid;grid-template-columns:1fr minmax(0,440px);gap:clamp(24px,5vw,72px);align-items:start}
+@media (max-width:820px){.uye-wrap{grid-template-columns:1fr}}
+.uye-intro h1{font-size:clamp(2.2rem,1.7rem + 2vw,3.4rem)}
+.uye-intro .muted{max-width:46ch}
+.form-card{padding:clamp(20px,3vw,32px);gap:18px}
+.uye-form{max-width:520px;margin-top:28px}
+.pw{position:relative}
+.pw .input{padding-right:84px}
+.pw-toggle{position:absolute;top:50%;right:8px;translate:0 -50%;font:600 var(--fs-xs) var(--font-body);padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.pw-toggle:hover{border-color:var(--leaf)}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;padding-bottom:24px;border-bottom:2px dashed var(--line)}
+.panel-head h1{font-size:clamp(2rem,1.6rem + 1.8vw,3rem)}
+.notice.warn{border-color:var(--orange-ink);color:var(--orange-ink);margin-top:24px;max-width:520px}

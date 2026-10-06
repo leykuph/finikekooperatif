@@ -1,0 +1,24 @@
+# Yerel geliştirme: docker compose up --build  ->  API http://localhost:8787
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: finike
+      POSTGRES_USER: finike
+      POSTGRES_PASSWORD: yerel-gelistirme
+    volumes: [db:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "finike"]
+      interval: 2s
+      retries: 20
+  api:
+    build: .
+    ports: ["8787:8787"]
+    environment:
+      DATABASE_URL: postgres://finike:yerel-gelistirme@db:5432/finike
+      ALLOWED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+      COOKIE_SECURE: "false"
+    depends_on:
+      db: { condition: service_healthy }
+volumes:
+  db:

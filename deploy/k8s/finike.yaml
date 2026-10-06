@@ -1,0 +1,125 @@
+# S.S. Finike Tarımsal Kalkınma Kooperatifi: ortak girişi API'si + PostgreSQL + Cloudflare Tunnel
+# Gizli değerler (veritabanı şifresi, tünel jetonu) bu dosyada değil; deploy/README.md'deki komutlarla oluşturulur.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: finike
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: finike
+spec:
+  selector: { app: postgres }
+  ports: [{ port: 5432 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: finike
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector: { matchLabels: { app: postgres } }
+  template:
+    metadata: { labels: { app: postgres } }
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          env:
+            - { name: POSTGRES_DB, value: finike }
+            - { name: POSTGRES_USER, value: finike }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: finike-db, key: password } }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          ports: [{ containerPort: 5432 }]
+          readinessProbe:
+            exec: { command: ["pg_isready", "-U", "finike", "-d", "finike"] }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { memory: 512Mi }
+          volumeMounts: [{ name: data, mountPath: /var/lib/postgresql/data }]
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: [ReadWriteOnce]
+        storageClassName: local-path
+        resources: { requests: { storage: 2Gi } }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finike-api
+  namespace: finike
+spec:
+  replicas: 1  # Deneme sınırı bellekte tutulduğu için tek kopya
+  selector: { matchLabels: { app: finike-api } }
+  template:
+    metadata: { labels: { app: finike-api } }
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/leykuph/finike-api:latest
+          imagePullPolicy: Always
+          env:
+            - { name: PGHOST, value: postgres }
+            - { name: PGDATABASE, value: finike }
+            - { name: PGUSER, value: finike }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: finike-db, key: password } }
+            - { name: ALLOWED_ORIGINS, value: "https://finike.leykuph.com" }
+            - { name: CLIENT_IP_HEADER, value: cf-connecting-ip }
+          ports: [{ containerPort: 8787 }]
+          readinessProbe:
+            httpGet: { path: /health, port: 8787 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 8787 }
+            periodSeconds: 30
+            failureThreshold: 4
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { memory: 256Mi }
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: finike-api
+  namespace: finike
+spec:
+  selector: { app: finike-api }
+  ports: [{ port: 80, targetPort: 8787 }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: finike
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: cloudflared } }
+  template:
+    metadata: { labels: { app: cloudflared } }
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:latest
+          args: ["tunnel", "--no-autoupdate", "--metrics", "0.0.0.0:2000", "run"]
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom: { secretKeyRef: { name: cloudflared, key: token } }
+          livenessProbe:
+            httpGet: { path: /ready, port: 2000 }
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests: { cpu: 20m, memory: 32Mi }
+            limits: { memory: 128Mi }

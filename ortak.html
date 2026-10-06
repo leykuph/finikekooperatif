@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Ortak Paneli · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
+<meta name="description" content="S.S. Finike Tarımsal Kalkınma Kooperatifi ortak paneli.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Quicksand:wght@400..700&family=Merienda:wght@400..800&display=swap">
+<link rel="stylesheet" href="css/main.css?v=21">
+<link rel="stylesheet" href="css/uye.css">
+<script src="js/main.js?v=2" defer></script>
+<script src="js/uye.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#icerik">İçeriğe geç</a>
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Ana menü">
+    <a class="brand" href="/" aria-label="S.S. Finike Tarımsal Kalkınma Kooperatifi, ana sayfa">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-text"><strong>Finike Kooperatifi</strong><small>Tarımsal Kalkınma</small></span>
+    </a>
+    <ul class="nav-links desktop">
+<li><a href="/">Finike Portakalı</a></li>
+<li><a href="/tarifler">Tarifler</a></li>
+<li><a href="/sosyal">Sosyal Medya</a></li>
+<li><a href="/iletisim">Bize Ulaşın</a></li>
+<li><a href="/lisans">Lisans ve Tescil</a></li>
+    </ul>
+    <details class="menu">
+      <summary aria-label="Menüyü aç">Menü</summary>
+      <div class="menu-panel">
+        <ul class="nav-links">
+<li><a href="/">Finike Portakalı</a></li>
+<li><a href="/tarifler">Tarifler</a></li>
+<li><a href="/sosyal">Sosyal Medya</a></li>
+<li><a href="/iletisim">Bize Ulaşın</a></li>
+<li><a href="/lisans">Lisans ve Tescil</a></li>
+        </ul>
+      </div>
+    </details>
+  </nav>
+</header>
+<main id="icerik">
+
+<section class="section uye">
+  <div class="wrap">
+    <p class="muted" id="yukleniyor" role="status">Bilgileriniz yükleniyor…</p>
+    <div id="panel" hidden>
+      <div class="panel-head">
+        <div class="stack" style="gap:6px">
+          <p class="eyebrow">Ortak Paneli</p>
+          <h1>Hoş Geldiniz, <span id="ad-soyad"></span></h1>
+          <p class="muted">Ortak numaranız: <b id="ortak-no-goster"></b></p>
+        </div>
+        <button class="btn btn-ghost" type="button" id="cikis-btn">Çıkış yap</button>
+      </div>
+
+      <div class="notice warn" id="sifre-uyari" hidden>Giriş yaptığınız şifre geçicidir. Devam etmeden önce kendinize ait yeni bir şifre belirleyin.</div>
+
+      <form class="card form-card uye-form" id="sifre-form" novalidate>
+        <h2 style="font-size:var(--fs-lg)" id="sifre">Şifre Değiştir</h2>
+        <div class="notice" id="sifre-mesaj" role="status" tabindex="-1" hidden></div>
+        <div class="field">
+          <label for="mevcut-sifre">Mevcut şifre</label>
+          <input class="input" id="mevcut-sifre" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="field">
+          <label for="yeni-sifre">Yeni şifre</label>
+          <input class="input" id="yeni-sifre" type="password" autocomplete="new-password" minlength="8" required aria-describedby="yeni-sifre-ipucu">
+          <span class="hint" id="yeni-sifre-ipucu">En az 8 karakter. Başka sitelerde kullanmadığınız bir şifre seçin.</span>
+        </div>
+        <div class="field">
+          <label for="yeni-sifre-2">Yeni şifre (tekrar)</label>
+          <input class="input" id="yeni-sifre-2" type="password" autocomplete="new-password" required>
+        </div>
+        <button class="btn btn-primary" type="submit" id="sifre-btn" style="justify-self:start">Şifreyi kaydet</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="stack">
+        <a class="brand" href="/" style="color:#fff">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-text"><strong>Finike Kooperatifi</strong><small style="color:#9FC0AC">Tarımsal Kalkınma</small></span>
+        </a>
+        <p style="font-size:.9375rem;max-width:36ch">Finike'nin üreticilerini bir araya getiren, coğrafi işaret tescilli Finike Portakalı’nı bahçeden doğrudan sofraya taşıyan kooperatif.</p>
+        <p style="font-size:.8125rem;color:#9FC0AC">Finike, Antalya 07740 · Türkiye</p>
+      </div>
+      <div>
+        <h4>Site</h4>
+        <ul>
+          <li><a href="/#fark">Neden Finike?</a></li>
+          <li><a href="/tarifler">Tarifler</a></li>
+          <li><a href="/sosyal">Sosyal Medya</a></li>
+          <li><a href="/iletisim">Bize Ulaşın</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kurumsal</h4>
+        <ul>
+          <li><a href="/lisans#cografi-isaret">Coğrafi İşaret</a></li>
+          <li><a href="/lisans#marka">Marka Kullanımı</a></li>
+          <li><a href="/kvkk">KVKK Aydınlatma Metni</a></li>
+          <li><a href="/cerez">Çerez Politikası</a></li>
+          <!-- Sipariş açılınca geri al: <li><a href="/lisans#satis">Mesafeli Satış ve İade</a></li> -->
+        </ul>
+      </div>
+      <div>
+        <h4>Hasat Bülteni</h4>
+        <p style="font-size:.9375rem">Sezon açılışını, ilk hasat tarihini ve kampanyaları ilk siz duyun. Ayda en fazla iki e-posta.</p>
+        <form class="news" id="news-form" novalidate>
+          <label class="sr-only" for="news-email">E-posta adresiniz</label>
+          <input id="news-email" type="email" placeholder="ornek@eposta.com" autocomplete="email" required>
+          <button class="btn" type="submit">Abone Ol</button>
+        </form>
+        <p class="news-msg" id="news-msg" role="status"></p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="yil">2026</span> S.S. Finike Tarımsal Kalkınma Kooperatifi. Tüm hakları saklıdır.</span>
+      <span>"Finike Portakalı" coğrafi işaret tescilli bir üründür.</span>
+      <span>Fotoğraflar geçicidir: Wikimedia Commons, <a href="/lisans#fotograflar">künyeler</a>.</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,4 @@
+exclude:
+  - api
+  - deploy
+  - scripts
