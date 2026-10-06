@@ -1,5 +1,6 @@
 import http from "node:http";
 import { pool, migrate, normalizeMemberNo } from "./db.js";
+import { TkgmError, mahalleler, parsel as tkgmParsel } from "./tkgm.js";
 import {
   DUMMY_HASH, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH,
   hashPassword, hashToken, newSessionToken, verifyPassword,
@@ -16,6 +17,8 @@ const COOKIE_NAME = "finike_oturum";
 const COOKIE_SECURE = process.env.COOKIE_SECURE !== "false";
 const SESSION_DAYS = 30;
 const MAX_BODY = 10 * 1024;
+const TKGM_LOOKUPS_PER_HOUR = 60;
+const MAX_PARCELS_PER_MEMBER = 200;
 
 // ---------- Deneme sınırı (bellek içi; tek kopya çalıştığı için yeterli) ----------
 const WINDOW_MS = 15 * 60 * 1000;
@@ -32,8 +35,17 @@ function recordFailure(kind, key) {
   if (!e || e.resetAt <= now) failures.set(k, { count: 1, resetAt: now + WINDOW_MS });
   else e.count++;
 }
+// TKGM'ye ortak başına saatlik sorgu sınırı (servisi yormamak ve engellenmemek için)
+const lookups = new Map();
+function countLookup(memberId) {
+  const now = Date.now(), e = lookups.get(memberId);
+  if (!e || e.resetAt <= now) { lookups.set(memberId, { count: 1, resetAt: now + 60 * 60 * 1000 }); return; }
+  if (++e.count > TKGM_LOOKUPS_PER_HOUR) throw new HttpError(429, "Bir saat içinde çok fazla parsel sorguladınız. Biraz sonra tekrar deneyin.");
+}
+
 setInterval(() => {
   const now = Date.now();
+  for (const [k, e] of lookups) if (e.resetAt <= now) lookups.delete(k);
   for (const [k, e] of failures) if (e.resetAt <= now) failures.delete(k);
 }, 60 * 1000).unref();
 
@@ -95,7 +107,7 @@ async function currentSession(req) {
   if (!token) return null;
   const tokenHash = hashToken(token);
   const { rows } = await pool.query(
-    `SELECT m.id, m.member_no, m.full_name, m.must_change_password, m.password_hash
+    `SELECT m.id, m.member_no, m.full_name, m.must_change_password, m.is_admin, m.password_hash
        FROM sessions s JOIN members m ON m.id = s.member_id
       WHERE s.token_hash = $1 AND s.expires_at > now() AND m.active`,
     [tokenHash]
@@ -104,7 +116,36 @@ async function currentSession(req) {
 }
 
 function publicMember(m) {
-  return { memberNo: m.member_no, fullName: m.full_name, mustChangePassword: m.must_change_password };
+  return { memberNo: m.member_no, fullName: m.full_name, mustChangePassword: m.must_change_password, isAdmin: m.is_admin };
+}
+
+// Geçici şifreyle yalnızca şifre değiştirilebilir; diğer işlemler için yeni şifre gerekir.
+async function requireMember(req, { admin = false } = {}) {
+  const session = await currentSession(req);
+  if (!session) throw new HttpError(401, "Oturumunuz kapanmış. Lütfen yeniden giriş yapın.");
+  if (session.member.must_change_password) throw new HttpError(403, "Önce geçici şifrenizi değiştirin.");
+  if (admin && !session.member.is_admin) throw new HttpError(403, "Bu sayfa yalnızca kooperatif yönetimi içindir.");
+  return session.member;
+}
+
+function parcelRow(r) {
+  return {
+    id: Number(r.id), mahalleId: r.mahalle_id, mahalle: r.mahalle_name, ada: r.ada, parsel: r.parsel,
+    nitelik: r.nitelik, areaM2: r.area_m2 === null ? null : Number(r.area_m2), mevkii: r.mevkii, pafta: r.pafta,
+    geometry: r.geometry, addedAt: r.created_at,
+  };
+}
+
+function parcelQuery(url) {
+  const q = new URL(url, "http://x").searchParams;
+  return parcelInput({ mahalleId: q.get("mahalle"), ada: q.get("ada"), parsel: q.get("parsel") });
+}
+
+function parcelInput(o) {
+  const mahalleId = Number(o.mahalleId), ada = String(o.ada ?? "").trim(), parsel = String(o.parsel ?? "").trim();
+  if (!Number.isInteger(mahalleId) || mahalleId <= 0) throw new HttpError(400, "Mahalle seçin.");
+  if (!/^\d{1,6}$/.test(ada) || !/^\d{1,6}$/.test(parsel)) throw new HttpError(400, "Ada ve parsel numarası yalnızca rakamdan oluşmalı.");
+  return { mahalleId, ada: String(Number(ada)), parsel: String(Number(parsel)) };
 }
 
 // ---------- Uç noktalar ----------
@@ -122,7 +163,7 @@ async function login(req, res) {
   }
 
   const { rows } = await pool.query(
-    "SELECT id, member_no, full_name, must_change_password, password_hash FROM members WHERE member_no = $1 AND active",
+    "SELECT id, member_no, full_name, must_change_password, is_admin, password_hash FROM members WHERE member_no = $1 AND active",
     [memberNo]
   );
   const member = rows[0];
@@ -182,6 +223,66 @@ async function changePassword(req, res) {
   send(res, 200, { ok: true });
 }
 
+// ---------- Parseller ----------
+async function listMahalleler(req, res) {
+  await requireMember(req);
+  send(res, 200, { mahalleler: await mahalleler() });
+}
+
+async function lookupParcel(req, res) {
+  const member = await requireMember(req);
+  const { mahalleId, ada, parsel } = parcelQuery(req.url);
+  countLookup(member.id);
+  send(res, 200, { parcel: await tkgmParsel(mahalleId, ada, parsel) });
+}
+
+async function myParcels(req, res) {
+  const member = await requireMember(req);
+  const { rows } = await pool.query("SELECT * FROM parcels WHERE member_id = $1 ORDER BY mahalle_name, ada::int, parsel::int", [member.id]);
+  send(res, 200, { parcels: rows.map(parcelRow) });
+}
+
+async function addParcel(req, res) {
+  const member = await requireMember(req);
+  const { mahalleId, ada, parsel } = parcelInput(await readJson(req));
+  const { rows: [{ count }] } = await pool.query("SELECT count(*)::int AS count FROM parcels WHERE member_id = $1", [member.id]);
+  if (count >= MAX_PARCELS_PER_MEMBER) throw new HttpError(400, `En fazla ${MAX_PARCELS_PER_MEMBER} parsel eklenebilir.`);
+  countLookup(member.id);
+  // Bilgiler istemciden değil, doğrudan TKGM'den alınır.
+  const p = await tkgmParsel(mahalleId, ada, parsel);
+  const { rows } = await pool.query(
+    `INSERT INTO parcels (member_id, mahalle_id, mahalle_name, ada, parsel, nitelik, area_m2, mevkii, pafta, geometry)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+     ON CONFLICT (member_id, mahalle_id, ada, parsel) DO NOTHING RETURNING *`,
+    [member.id, mahalleId, p.mahalle, ada, parsel, p.nitelik, p.areaM2, p.mevkii, p.pafta, JSON.stringify(p.geometry)]
+  );
+  if (!rows[0]) throw new HttpError(409, "Bu parsel zaten listenizde.");
+  send(res, 201, { parcel: parcelRow(rows[0]) });
+}
+
+async function removeParcel(req, res, id) {
+  const member = await requireMember(req);
+  const { rowCount } = await pool.query("DELETE FROM parcels WHERE id = $1 AND member_id = $2", [id, member.id]);
+  if (!rowCount) throw new HttpError(404, "Parsel bulunamadı.");
+  send(res, 200, { ok: true });
+}
+
+async function allParcels(req, res) {
+  await requireMember(req, { admin: true });
+  const { rows } = await pool.query(
+    `SELECT m.member_no, m.full_name, m.active, p.*,
+            count(*) OVER (PARTITION BY p.mahalle_id, p.ada, p.parsel) AS owners
+       FROM members m LEFT JOIN parcels p ON p.member_id = m.id
+      ORDER BY m.full_name, p.mahalle_name, p.ada::int, p.parsel::int`
+  );
+  const members = new Map();
+  for (const r of rows) {
+    if (!members.has(r.member_no)) members.set(r.member_no, { memberNo: r.member_no, fullName: r.full_name, active: r.active, parcels: [] });
+    if (r.id !== null) members.get(r.member_no).parcels.push({ ...parcelRow(r), shared: Number(r.owners) > 1 });
+  }
+  send(res, 200, { members: [...members.values()] });
+}
+
 async function health(req, res) {
   await pool.query("SELECT 1");
   send(res, 200, { ok: true });
@@ -189,6 +290,11 @@ async function health(req, res) {
 
 const routes = {
   "GET /health": health,
+  "GET /tkgm/mahalleler": listMahalleler,
+  "GET /tkgm/parsel": lookupParcel,
+  "GET /parcels": myParcels,
+  "POST /parcels": addParcel,
+  "GET /admin/parcels": allParcels,
   "GET /auth/me": me,
   "POST /auth/login": login,
   "POST /auth/logout": logout,
@@ -210,20 +316,21 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     if (!allowed) return send(res, 403);
     return send(res, 204, undefined, {
-      "Access-Control-Allow-Methods": "GET, POST",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE",
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Max-Age": "600",
     });
   }
   // Durum değiştiren istekler yalnızca sitemizden gelebilir (CSRF koruması).
-  if (req.method === "POST" && !allowed) return send(res, 403, { error: "İzin verilmeyen kaynak." });
+  if (req.method !== "GET" && !allowed) return send(res, 403, { error: "İzin verilmeyen kaynak." });
 
-  const handler = routes[`${req.method} ${path}`];
+  const del = req.method === "DELETE" && path.match(/^\/parcels\/(\d+)$/);
+  const handler = del ? (rq, rs) => removeParcel(rq, rs, Number(del[1])) : routes[`${req.method} ${path}`];
   if (!handler) return send(res, 404, { error: "Bulunamadı." });
   try {
     await handler(req, res);
   } catch (err) {
-    if (err instanceof HttpError) return send(res, err.status, { error: err.message });
+    if (err instanceof HttpError || err instanceof TkgmError) return send(res, err.status, { error: err.message });
     console.error(err);
     send(res, 500, { error: "Sunucuda bir sorun oluştu. Biraz sonra tekrar deneyin." });
   }

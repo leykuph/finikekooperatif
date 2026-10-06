@@ -12,3 +12,34 @@
 .panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;padding-bottom:24px;border-bottom:2px dashed var(--line)}
 .panel-head h1{font-size:clamp(2rem,1.6rem + 1.8vw,3rem)}
 .notice.warn{border-color:var(--orange-ink);color:var(--orange-ink);margin-top:24px;max-width:520px}
+
+/* ---------- Parsellerim ve yönetim ---------- */
+.panel-block{margin-top:clamp(32px,5vw,56px);display:grid;gap:20px}
+.panel-block h2{font-size:var(--fs-xl)}
+.block-head{display:grid;gap:6px}
+.parsel-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.parsel-grid{grid-template-columns:1fr}}
+.map{height:clamp(320px,50vw,480px);border-radius:var(--radius-sm);border:1.5px solid var(--line);background:#1d2a22;z-index:0}
+.map-wide{height:clamp(340px,55vw,560px);margin-top:24px}
+.form-card h3{font-size:var(--fs-lg)}
+.small{font-size:var(--fs-sm)}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.onizleme{display:grid;gap:14px;padding-top:16px;border-top:1.5px dashed var(--line)}
+.parsel-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.parsel-card{gap:14px}
+.parsel-dl{display:grid;gap:8px;margin:0}
+.parsel-dl div{display:grid;grid-template-columns:72px 1fr;gap:10px}
+.parsel-dl dt{font-size:var(--fs-xs);color:var(--muted);padding-top:2px}
+.parsel-dl dd{margin:0;font-weight:600;font-size:var(--fs-sm)}
+.btn-sm{padding:7px 14px;font-size:var(--fs-sm)}
+.btn.danger{color:var(--error);border-color:var(--error)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{display:grid;gap:2px;padding:16px 18px;border:1.5px dashed var(--line);border-radius:var(--radius-sm);background:var(--surface)}
+.kpi-value{font-family:var(--font-display);font-size:clamp(1.5rem,1.2rem + 1vw,2.1rem);color:var(--heading);font-variant-numeric:tabular-nums}
+.kpi-label{font-size:var(--fs-sm);color:var(--muted);font-weight:600}
+.ortak-tablo td.num,.ortak-tablo th.num{text-align:right;font-variant-numeric:tabular-nums}
+.ortak-tablo tr.alt td{padding-top:0;color:var(--muted)}
+.parsel-mini{margin:0;padding-left:18px;display:grid;gap:4px;font-size:var(--fs-xs)}
+.parsel-mini li span + .etiket,.ortak-tablo td span + .etiket{margin-left:8px}
+.etiket{display:inline-block;font-size:var(--fs-xs);font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--orange-ink);color:var(--orange-ink)}

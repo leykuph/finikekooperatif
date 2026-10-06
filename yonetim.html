@@ -6,8 +6,8 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<title>Ortak Paneli · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
-<meta name="description" content="S.S. Finike Tarımsal Kalkınma Kooperatifi ortak paneli.">
+<title>Yönetim · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
+<meta name="description" content="S.S. Finike Tarımsal Kalkınma Kooperatifi yönetim sayfası.">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,73 +53,30 @@
 
 <section class="section uye">
   <div class="wrap">
-    <p class="muted" id="yukleniyor" role="status">Bilgileriniz yükleniyor…</p>
-    <div id="panel" hidden>
+    <p class="muted" id="yukleniyor" role="status">Bilgiler yükleniyor…</p>
+    <div id="yonetim" hidden>
       <div class="panel-head">
         <div class="stack" style="gap:6px">
-          <p class="eyebrow">Ortak Paneli</p>
-          <h1>Hoş Geldiniz, <span id="ad-soyad"></span></h1>
-          <p class="muted">Kullanıcı adınız: <b id="ortak-no-goster"></b></p>
+          <p class="eyebrow">Kooperatif Yönetimi</p>
+          <h1>Ortakların Parselleri</h1>
+          <p class="muted">Ortakların kendi beyan ettiği parseller. Alan ve nitelik bilgileri TKGM'den alınmıştır.</p>
         </div>
         <div class="btn-row">
-          <a class="btn btn-ghost" href="/yonetim" id="yonetim-link" hidden>Yönetim</a>
-          <button class="btn btn-ghost" type="button" id="cikis-btn">Çıkış yap</button>
+          <button class="btn btn-ghost" type="button" id="csv-btn">Excel'e aktar (CSV)</button>
+          <a class="btn btn-ghost" href="/ortak">Ortak paneli</a>
         </div>
       </div>
-
-      <div class="notice warn" id="sifre-uyari" hidden>Giriş yaptığınız şifre geçicidir. Parsellerinizi görmeden önce kendinize ait yeni bir şifre belirleyin.</div>
-
-      <section class="panel-block" id="parsellerim" aria-labelledby="parsel-baslik" hidden>
-        <div class="block-head">
-          <h2 id="parsel-baslik">Parsellerim</h2>
-          <p class="muted" id="parsel-ozet" role="status"></p>
+      <div class="kpis" id="ozet"></div>
+      <div class="map map-wide" id="harita" role="region" aria-label="Bütün ortak parsellerinin uydu haritası"></div>
+      <div class="panel-block">
+        <h2>Ortaklara Göre</h2>
+        <div class="table-wrap">
+          <table class="ortak-tablo">
+            <thead><tr><th scope="col">Ortak</th><th scope="col">Kullanıcı adı</th><th scope="col" class="num">Parsel</th><th scope="col" class="num">Toplam alan</th></tr></thead>
+            <tbody id="ortak-satirlar"></tbody>
+          </table>
         </div>
-        <div class="parsel-grid">
-          <div class="map" id="harita" role="region" aria-label="Parsellerin uydu haritası"></div>
-          <div class="stack" style="gap:20px">
-            <form class="card form-card" id="parsel-form" novalidate>
-              <h3>Parsel Ekle</h3>
-              <p class="muted small">Tapudaki mahalle, ada ve parsel numarasını yazın. Bilgiler Tapu ve Kadastro Genel Müdürlüğü'nün (TKGM) parsel sorgu sisteminden alınır.</p>
-              <div class="field">
-                <label for="mahalle">Mahalle / Köy</label>
-                <select class="select" id="mahalle" required><option value="">Yükleniyor…</option></select>
-              </div>
-              <div class="row-2">
-                <div class="field"><label for="ada">Ada</label><input class="input" id="ada" inputmode="numeric" pattern="[0-9]*" maxlength="6" required></div>
-                <div class="field"><label for="parsel">Parsel</label><input class="input" id="parsel" inputmode="numeric" pattern="[0-9]*" maxlength="6" required></div>
-              </div>
-              <div class="notice" id="parsel-mesaj" role="status" tabindex="-1" hidden></div>
-              <button class="btn btn-primary" type="submit" id="sorgula-btn">Sorgula</button>
-              <div class="onizleme" id="onizleme" hidden>
-                <dl class="parsel-dl" id="onizleme-bilgi"></dl>
-                <button class="btn btn-primary" type="button" id="ekle-btn">Parsellerime ekle</button>
-              </div>
-            </form>
-          </div>
-        </div>
-        <div class="parsel-list" id="parsel-liste"></div>
-      </section>
-
-      <section class="panel-block" aria-labelledby="sifre">
-        <form class="card form-card uye-form" id="sifre-form" novalidate>
-          <h2 style="font-size:var(--fs-lg)" id="sifre">Şifre Değiştir</h2>
-          <div class="notice" id="sifre-mesaj" role="status" tabindex="-1" hidden></div>
-          <div class="field">
-            <label for="mevcut-sifre">Mevcut şifre</label>
-            <input class="input" id="mevcut-sifre" type="password" autocomplete="current-password" required>
-          </div>
-          <div class="field">
-            <label for="yeni-sifre">Yeni şifre</label>
-            <input class="input" id="yeni-sifre" type="password" autocomplete="new-password" minlength="8" required aria-describedby="yeni-sifre-ipucu">
-            <span class="hint" id="yeni-sifre-ipucu">En az 8 karakter. Başka sitelerde kullanmadığınız bir şifre seçin.</span>
-          </div>
-          <div class="field">
-            <label for="yeni-sifre-2">Yeni şifre (tekrar)</label>
-            <input class="input" id="yeni-sifre-2" type="password" autocomplete="new-password" required>
-          </div>
-          <button class="btn btn-primary" type="submit" id="sifre-btn" style="justify-self:start">Şifreyi kaydet</button>
-        </form>
-      </section>
+      </div>
     </div>
   </div>
 </section>

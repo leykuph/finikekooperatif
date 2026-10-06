@@ -8,6 +8,7 @@ const USAGE = `Kullanım:
   node src/cli.js sifirla <kullanıcı-adı>        Geçici şifre üretir, açık oturumları kapatır
   node src/cli.js pasif <kullanıcı-adı>          Hesabı kapatır (kayıt silinmez)
   node src/cli.js aktif <kullanıcı-adı>          Kapatılmış hesabı yeniden açar
+  node src/cli.js yonetici <kullanıcı-adı> evet  Yönetim sayfasına erişim verir ("hayir" ile geri alır)
   node src/cli.js liste                          Bütün ortak hesaplarını listeler
 
 Kullanıcı adı soyadı + adın ilk iki harfidir (Ahmet Yılmaz -> yilmazah). Doluysa adın ilk üç, dört...
@@ -82,15 +83,23 @@ async function run([cmd, ...args]) {
       if (!active) await pool.query("DELETE FROM sessions WHERE member_id = $1", [rows[0].id]);
       return console.log(`${memberNo} ${active ? "yeniden açıldı" : "kapatıldı"}.`);
     }
+    case "yonetici": {
+      const flag = { evet: true, hayir: false, "hayır": false }[(args[1] || "").toLocaleLowerCase("tr-TR")];
+      if (!memberNo || flag === undefined) return fail(USAGE);
+      const { rowCount } = await pool.query("UPDATE members SET is_admin = $1 WHERE member_no = $2", [flag, memberNo]);
+      if (!rowCount) return fail(`"${memberNo}" kullanıcı adlı ortak bulunamadı.`);
+      return console.log(`${memberNo} ${flag ? "artık yönetim sayfasına erişebilir" : "için yönetim erişimi kaldırıldı"}.`);
+    }
     case "liste": {
       const { rows } = await pool.query(
-        `SELECT member_no, full_name, active, must_change_password, last_login_at FROM members ORDER BY member_no`
+        `SELECT member_no, full_name, active, must_change_password, is_admin, last_login_at FROM members ORDER BY member_no`
       );
       if (!rows.length) return console.log("Kayıtlı ortak yok.");
       return console.table(rows.map((r) => ({
         "Kullanıcı adı": r.member_no,
         "Ad Soyad": r.full_name,
         Durum: r.active ? (r.must_change_password ? "şifre bekliyor" : "aktif") : "kapalı",
+        "Yönetici": r.is_admin ? "evet" : "",
         "Son giriş": r.last_login_at ? r.last_login_at.toLocaleString("tr-TR", { timeZone: "Europe/Istanbul" }) : "-",
       })));
     }

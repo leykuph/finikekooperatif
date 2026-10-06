@@ -12,6 +12,8 @@
       return r.json().catch(function(){ return {}; }).then(function(data){ data.status = r.status; return data; });
     });
   }
+  window.uyeApi = api;
+  window.uyeNetErr = NET_ERR;
   function show(el, text, cls){ el.className = "notice" + (cls ? " " + cls : ""); el.textContent = text; el.hidden = false; el.focus(); }
   function busy(btn, on, label){ btn.disabled = on; btn.textContent = label; }
 
@@ -48,13 +50,22 @@
       document.getElementById("ad-soyad").textContent = d.member.fullName;
       document.getElementById("ortak-no-goster").textContent = d.member.memberNo;
       document.getElementById("sifre-uyari").hidden = !d.member.mustChangePassword;
+      document.getElementById("yonetim-link").hidden = !d.member.isAdmin;
       loading.hidden = true; panel.hidden = false;
       if (d.member.mustChangePassword) document.getElementById("mevcut-sifre").focus();
+      else openParcels();
     }).catch(function(){ loading.textContent = NET_ERR; });
 
     document.getElementById("cikis-btn").addEventListener("click", function(){
       api("POST", "/auth/logout", {}).finally(function(){ location.href = "/giris"; });
     });
+
+    // Parseller yalnızca kalıcı şifreyle açılır (js/parsel.js)
+    var openParcels = function(){
+      var sec = document.getElementById("parsellerim");
+      if (!sec.hidden) return;
+      sec.hidden = false; document.dispatchEvent(new Event("parseller:ac"));
+    };
 
     var form = document.getElementById("sifre-form"), msg = document.getElementById("sifre-mesaj"), sbtn = document.getElementById("sifre-btn");
     form.addEventListener("submit", function(e){
@@ -68,7 +79,7 @@
         busy(sbtn, false, "Şifreyi kaydet");
         if (d.status === 401) { location.replace("/giris"); return; }
         if (!d.ok) { show(msg, d.error || NET_ERR, "bad"); return; }
-        form.reset(); document.getElementById("sifre-uyari").hidden = true;
+        form.reset(); document.getElementById("sifre-uyari").hidden = true; openParcels();
         show(msg, "Şifreniz değişti. Başka cihazlarda açık kalan oturumlar kapatıldı.", "ok");
       }).catch(function(){ busy(sbtn, false, "Şifreyi kaydet"); show(msg, NET_ERR, "bad"); });
     });

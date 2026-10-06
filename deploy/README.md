@@ -38,8 +38,16 @@ $API ekle "Ahmet" "Yılmaz"    # yeni hesap: yilmazah (doluysa yilmazahm, yilmaz
 $API sifirla yilmazah          # şifresini unutan ortağa yeni geçici şifre
 $API pasif yilmazah            # hesabı kapat (ortaklıktan ayrılma vb.)
 $API aktif yilmazah            # yeniden aç
+$API yonetici yilmazah evet    # yönetim sayfasına (/yonetim) erişim; "hayir" ile geri alınır
 $API liste                    # bütün hesaplar
 ```
+
+## Parseller
+
+Ortaklar panelde mahalle, ada ve parsel numarasıyla parsellerini ekler. Bilgiler (nitelik, alan, mevkii, pafta, sınırlar)
+TKGM Parsel Sorgu'nun kullandığı MEGSİS servisinden alınır ve veritabanında saklanır. Bu servis resmî ve belgelenmiş
+değildir; değişirse yalnızca `api/src/tkgm.js` güncellenir. Kayıtlı parseller servis çalışmasa da görünmeye devam eder.
+Ortak başına saatte en fazla 60 sorgu yapılabilir.
 
 ## Güncelleme
 
