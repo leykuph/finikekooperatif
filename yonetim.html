@@ -14,11 +14,11 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Quicksand:wght@400..700&family=Merienda:wght@400..800&display=swap">
 <link rel="stylesheet" href="css/main.css?v=21">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<link rel="stylesheet" href="css/uye.css?v=2">
+<link rel="stylesheet" href="css/uye.css?v=3">
 <script src="js/main.js?v=2" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 <script src="js/uye.js?v=2" defer></script>
-<script src="js/parsel.js" defer></script>
+<script src="js/parsel.js?v=2" defer></script>
 </head>
 <body>
 <a class="skip" href="#icerik">İçeriğe geç</a>
@@ -66,6 +66,42 @@
           <a class="btn btn-ghost" href="/ortak">Ortak paneli</a>
         </div>
       </div>
+      <section class="panel-block" aria-labelledby="kayit-baslik">
+        <h2 id="kayit-baslik">Yeni Ortak Kaydı</h2>
+        <div class="kayit-grid">
+          <form class="card form-card" id="kayit-form" novalidate autocomplete="off">
+            <div class="row-2">
+              <div class="field"><label for="k-ad">Ad</label><input class="input" id="k-ad" maxlength="60" required></div>
+              <div class="field"><label for="k-soyad">Soyad</label><input class="input" id="k-soyad" maxlength="60" required></div>
+            </div>
+            <div class="row-2">
+              <div class="field">
+                <label for="k-tc">TC kimlik no</label>
+                <input class="input num" id="k-tc" inputmode="numeric" autocomplete="off" required aria-describedby="k-tc-sayac">
+                <span class="hint" id="k-tc-sayac">0 / 11</span>
+              </div>
+              <div class="field">
+                <label for="k-tel">Cep telefonu</label>
+                <input class="input num" id="k-tel" type="tel" inputmode="numeric" placeholder="05xx xxx xx xx" autocomplete="off" required>
+              </div>
+            </div>
+            <p class="muted small">TC ve telefon kaydedilmez; yalnızca ortağın ilk giriş şifresini (TC + telefonun son 4 hanesi) oluşturmak için kullanılır. Kullanıcı adı otomatik verilir.</p>
+            <div class="notice" id="kayit-mesaj" role="status" tabindex="-1" hidden></div>
+            <button class="btn btn-primary" type="submit" id="kayit-btn" style="justify-self:start">Ortağı kaydet</button>
+          </form>
+          <div class="card sonuc" id="kayit-sonuc" hidden tabindex="-1">
+            <h3>Hesap Açıldı</h3>
+            <p>Kullanıcı adı: <b id="kayit-kullanici"></b></p>
+            <p class="muted small">Aşağıdaki mesajı ortağa gönderin. Mesajda gizli bilgi yoktur.</p>
+            <pre class="hos-geldin" id="kayit-metin"></pre>
+            <div class="btn-row">
+              <button class="btn btn-ghost btn-sm" type="button" id="kopyala-btn">Mesajı kopyala</button>
+              <a class="btn btn-ghost btn-sm" id="whatsapp-link" target="_blank" rel="noopener">WhatsApp ile gönder</a>
+              <a class="btn btn-ghost btn-sm" id="sms-link">SMS ile gönder</a>
+            </div>
+          </div>
+        </div>
+      </section>
       <div class="kpis" id="ozet"></div>
       <div class="map map-wide" id="harita" role="region" aria-label="Bütün ortak parsellerinin uydu haritası"></div>
       <div class="panel-block">

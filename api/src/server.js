@@ -1,8 +1,9 @@
 import http from "node:http";
 import { pool, migrate, normalizeMemberNo } from "./db.js";
 import { TkgmError, mahalleler, parsel as tkgmParsel } from "./tkgm.js";
+import { createMember, isValidName, welcomeMessage } from "./members.js";
 import {
-  DUMMY_HASH, INITIAL_PASSWORD_MAX_FAILURES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH,
+  DUMMY_HASH, INITIAL_PASSWORD_MAX_FAILURES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, initialPassword,
   hashPassword, hashToken, newSessionToken, verifyPassword,
 } from "./auth.js";
 
@@ -285,17 +286,41 @@ async function removeParcel(req, res, id) {
 async function allParcels(req, res) {
   await requireMember(req, { admin: true });
   const { rows } = await pool.query(
-    `SELECT m.member_no, m.full_name, m.active, p.*,
+    `SELECT m.member_no, m.full_name, m.active, m.must_change_password, p.*,
             count(*) OVER (PARTITION BY p.mahalle_id, p.ada, p.parsel) AS owners
        FROM members m LEFT JOIN parcels p ON p.member_id = m.id
       ORDER BY m.full_name, p.mahalle_name, p.ada::int, p.parsel::int`
   );
   const members = new Map();
   for (const r of rows) {
-    if (!members.has(r.member_no)) members.set(r.member_no, { memberNo: r.member_no, fullName: r.full_name, active: r.active, parcels: [] });
+    if (!members.has(r.member_no)) members.set(r.member_no, {
+      memberNo: r.member_no, fullName: r.full_name, active: r.active, pendingFirstLogin: r.must_change_password, parcels: [],
+    });
     if (r.id !== null) members.get(r.member_no).parcels.push({ ...parcelRow(r), shared: Number(r.owners) > 1 });
   }
   send(res, 200, { members: [...members.values()] });
+}
+
+// Yönetim sayfasından ortak kaydı. TC ve telefon yalnızca ilk şifreyi üretmek için kullanılır; kaydedilmez, loglanmaz.
+async function addMember(req, res) {
+  const admin = await requireMember(req, { admin: true });
+  const body = await readJson(req);
+  const firstName = String(body.firstName ?? "").trim().replace(/\s+/g, " ");
+  const lastName = String(body.lastName ?? "").trim().replace(/\s+/g, " ");
+  if (!isValidName(firstName) || !isValidName(lastName)) throw new HttpError(400, "Ad ve soyad yalnızca harflerden oluşmalı.");
+  let password;
+  try {
+    password = initialPassword(body.tc, body.phone);
+  } catch (err) {
+    throw new HttpError(400, err.message);
+  }
+  const m = await createMember({ firstName, lastName, password, createdBy: admin.id });
+  console.info(`ortak eklendi: ${m.username} (yönetici=${admin.member_no})`);
+  send(res, 201, {
+    member: { memberNo: m.username, fullName: m.fullName, pendingFirstLogin: true, active: true, parcels: [] },
+    usernameTaken: m.username !== m.base ? m.base : null,
+    message: welcomeMessage(m.fullName, m.username),
+  });
 }
 
 async function health(req, res) {
@@ -310,6 +335,7 @@ const routes = {
   "GET /parcels": myParcels,
   "POST /parcels": addParcel,
   "GET /admin/parcels": allParcels,
+  "POST /admin/members": addMember,
   "GET /auth/me": me,
   "POST /auth/login": login,
   "POST /auth/logout": logout,

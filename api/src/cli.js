@@ -1,6 +1,7 @@
 // Ortak hesaplarını yönetme komutları. Sunucuda:
 //   kubectl -n finike exec deploy/finike-api -- node src/cli.js <komut> ...
-import { pool, migrate, normalizeMemberNo, usernameCandidates } from "./db.js";
+import { pool, migrate, normalizeMemberNo } from "./db.js";
+import { createMember, isValidName, welcomeMessage } from "./members.js";
 import {
   INITIAL_PASSWORD_DAYS, INITIAL_PASSWORD_MAX_FAILURES, hashPassword, initialPassword, isValidTc, mobileDigits,
 } from "./auth.js";
@@ -24,20 +25,9 @@ function fail(msg) {
   process.exitCode = 1;
 }
 
-// Mesajda gizli bilgi yoktur; ortağa SMS, WhatsApp ya da sözlü olarak iletilebilir.
 function printWelcome(fullName, memberNo) {
-  console.log(`
----------------------------------------------------------------
-Sayın ${fullName},
-S.S. Finike Tarımsal Kalkınma Kooperatifi ortak paneline
-https://finike.leykuph.com/giris adresinden girebilirsiniz.
-
-Kullanıcı adı : ${memberNo}
-İlk şifre     : TC kimlik numaranız + cep telefonunuzun son 4 hanesi
-                (boşluksuz, ör. 12345678950 ve 0532 111 4567 için 123456789504567)
-
-İlk şifre ${INITIAL_PASSWORD_DAYS} gün geçerlidir. Girişte kendinize yeni bir şifre belirleyeceksiniz.
----------------------------------------------------------------`);
+  const line = "-".repeat(63);
+  console.log(`\n${line}\n${welcomeMessage(fullName, memberNo)}\n${line}`);
 }
 
 // Yalnızca rakam kabul eden, en fazla `max` hane yazdıran alan: "TC kimlik no : 1234567____  7/11"
@@ -85,16 +75,6 @@ async function askInitialPassword(tcArg, phoneArg) {
   return initialPassword(tc, phone);
 }
 
-async function freeUsername(firstName, lastName) {
-  const candidates = usernameCandidates(firstName, lastName);
-  const first = candidates.next().value;
-  if (!first) return null;
-  const { rows } = await pool.query("SELECT member_no FROM members WHERE member_no LIKE $1 || '%'", [first]);
-  const taken = new Set(rows.map((r) => r.member_no));
-  if (!taken.has(first)) return { username: first, base: first };
-  for (const c of candidates) if (!taken.has(c)) return { username: c, base: first };
-}
-
 async function run([cmd, ...args]) {
   await migrate();
   const memberNo = normalizeMemberNo(args[0]);
@@ -103,20 +83,11 @@ async function run([cmd, ...args]) {
     case "ekle": {
       const firstName = (args[0] || "").trim(), lastName = (args[1] || "").trim();
       if (args.length < 2 || args.length > 4) return fail(USAGE);
-      const nameOk = (n) => /^[\p{L}][\p{L} .'-]*$/u.test(n);
-      if (!nameOk(firstName) || !nameOk(lastName)) {
+      if (!isValidName(firstName) || !isValidName(lastName)) {
         return fail(`Ad ve soyad yalnızca harflerden oluşmalı: ekle "Ahmet" "Yılmaz"\n\n${USAGE}`);
       }
-      const free = await freeUsername(firstName, lastName);
-      if (!free) return fail(USAGE);
       const password = await askInitialPassword(args[2], args[3]);
-      const { username, base } = free;
-      const fullName = `${firstName} ${lastName}`;
-      await pool.query(
-        `INSERT INTO members (member_no, full_name, password_hash, initial_password_expires_at)
-         VALUES ($1, $2, $3, now() + make_interval(days => $4))`,
-        [username, fullName, await hashPassword(password), INITIAL_PASSWORD_DAYS]
-      );
+      const { username, base, fullName } = await createMember({ firstName, lastName, password });
       if (username !== base) console.log(`Not: "${base}" kullanımda olduğu için kullanıcı adı "${username}" verildi.`);
       return printWelcome(fullName, username);
     }

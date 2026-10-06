@@ -48,3 +48,6 @@ CREATE INDEX IF NOT EXISTS parcels_lookup_idx ON parcels (mahalle_id, ada, parse
 -- İlk şifre (TC kimlik no + telefonun son 4 hanesi) için süre ve hatalı deneme kilidi.
 ALTER TABLE members ADD COLUMN IF NOT EXISTS failed_logins integer NOT NULL DEFAULT 0;
 ALTER TABLE members ADD COLUMN IF NOT EXISTS initial_password_expires_at timestamptz;
+
+-- Hesabı yönetim sayfasından açan yönetici (komut satırından açılanlarda boş).
+ALTER TABLE members ADD COLUMN IF NOT EXISTS created_by bigint REFERENCES members(id) ON DELETE SET NULL;

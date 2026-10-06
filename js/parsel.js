@@ -110,9 +110,11 @@
       if (d.status === 401) { location.replace("/giris"); return; }
       if (d.status === 403) { location.replace("/ortak"); return; }
       if (!d.members) { loading.textContent = d.error || window.uyeNetErr; return; }
-      data = d.members; loading.hidden = true; adminRoot.hidden = false; renderAdmin();
+      data = d.members; loading.hidden = true; adminRoot.hidden = false;
+      map = makeMap("harita"); layer = L.featureGroup().addTo(map); renderAdmin();
     }).catch(function(){ loading.textContent = window.uyeNetErr; });
 
+    var map, layer;
     function renderAdmin(){
       var all = [], withParcels = 0;
       data.forEach(function(m){ if (m.parcels.length) withParcels++; m.parcels.forEach(function(p){ all.push({m: m, p: p}); }); });
@@ -120,22 +122,23 @@
       var unique = {};
       all.forEach(function(x){ unique[x.p.mahalleId + "/" + x.p.ada + "/" + x.p.parsel] = x.p.areaM2 || 0; });
       var keys = Object.keys(unique), total = keys.reduce(function(a, k){ return a + unique[k]; }, 0);
-      var kpis = document.getElementById("ozet");
+      var kpis = document.getElementById("ozet"); kpis.textContent = "";
       [["Ortak", data.length], ["Parsel bildiren", withParcels], ["Parsel", keys.length], ["Toplam alan", dekar(total)]].forEach(function(k){
         kpis.appendChild(el("div", {"class": "kpi"}, [el("span", {"class": "kpi-value", text: String(k[1])}), el("span", {"class": "kpi-label", text: k[0]})]));
       });
 
-      var map = makeMap("harita"), layer = L.featureGroup().addTo(map);
+      layer.clearLayers();
       all.forEach(function(x){
         if (!x.p.geometry) return;
         L.geoJSON(x.p.geometry, {style: STYLE}).bindTooltip(x.m.fullName + " · " + label(x.p) + " · " + dekar(x.p.areaM2)).addTo(layer);
       });
       if (layer.getLayers().length) map.fitBounds(layer.getBounds(), {maxZoom: 16, padding: [20, 20]});
 
-      var tbody = document.getElementById("ortak-satirlar");
+      var tbody = document.getElementById("ortak-satirlar"); tbody.textContent = "";
       data.forEach(function(m){
         var sum = m.parcels.reduce(function(a, p){ return a + (p.areaM2 || 0); }, 0);
-        var name = el("td", {}, [el("span", {text: m.fullName}), m.active ? null : el("span", {"class": "etiket", text: "kapalı"})]);
+        var status = !m.active ? "kapalı" : m.pendingFirstLogin ? "ilk giriş bekliyor" : null;
+        var name = el("td", {}, [el("span", {text: m.fullName}), status ? el("span", {"class": "etiket", text: status}) : null]);
         tbody.appendChild(el("tr", {}, [name, el("td", {text: m.memberNo}), el("td", {"class": "num", text: String(m.parcels.length)}), el("td", {"class": "num", text: m.parcels.length ? dekar(sum) : "-"})]));
         if (!m.parcels.length) return;
         var ul = el("ul", {"class": "parsel-mini"});
@@ -148,6 +151,53 @@
         tbody.appendChild(el("tr", {"class": "alt"}, [el("td", {colspan: "4"}, [ul])]));
       });
     }
+
+    /* ---------- Yeni ortak kaydı ---------- */
+    function validTc(tc){
+      if (!/^[1-9]\d{10}$/.test(tc)) return false;
+      var d = tc.split("").map(Number), odd = d[0] + d[2] + d[4] + d[6] + d[8], even = d[1] + d[3] + d[5] + d[7];
+      return ((odd * 7 - even) % 10 + 10) % 10 === d[9] && d.slice(0, 10).reduce(function(a, b){ return a + b; }, 0) % 10 === d[10];
+    }
+    function mobile(v){ var d = v.replace(/^(90|0)/, ""); return /^5\d{9}$/.test(d) ? d : null; }
+    var kf = document.getElementById("kayit-form"), kmsg = document.getElementById("kayit-mesaj"), kbtn = document.getElementById("kayit-btn");
+    var tcIn = document.getElementById("k-tc"), telIn = document.getElementById("k-tel"), sayac = document.getElementById("k-tc-sayac");
+    // Yalnızca rakam; en fazla 11 hane (yapıştırılan metindeki boşluk ve işaretler atılır)
+    [tcIn, telIn].forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var v = inp.value.replace(/\D/g, "").slice(0, 11);
+        if (v !== inp.value) inp.value = v;
+        if (inp === tcIn) sayac.textContent = v.length + " / 11";
+      });
+    });
+    kf.addEventListener("submit", function(e){
+      e.preventDefault();
+      var first = document.getElementById("k-ad").value.trim(), last = document.getElementById("k-soyad").value.trim();
+      var tc = tcIn.value, tel = telIn.value;
+      if (!first || !last) { show(kmsg, "Ad ve soyadı yazın.", "bad"); return; }
+      if (!validTc(tc)) { show(kmsg, "TC kimlik numarası geçersiz. 11 haneyi kontrol edin.", "bad"); tcIn.focus(); return; }
+      if (!mobile(tel)) { show(kmsg, "Cep telefonu 05xx xxx xx xx biçiminde olmalı.", "bad"); telIn.focus(); return; }
+      kmsg.hidden = true; kbtn.disabled = true; kbtn.textContent = "Kaydediliyor…";
+      api("POST", "/admin/members", {firstName: first, lastName: last, tc: tc, phone: tel}).then(function(d){
+        kbtn.disabled = false; kbtn.textContent = "Ortağı kaydet";
+        if (!d.member) { show(kmsg, d.error || window.uyeNetErr, "bad"); return; }
+        data.push(d.member);
+        data.sort(function(a, b){ return a.fullName.localeCompare(b.fullName, "tr"); });
+        renderAdmin();
+        var phone = "90" + mobile(tel);
+        document.getElementById("kayit-kullanici").textContent = d.member.memberNo;
+        document.getElementById("kayit-metin").textContent = d.message;
+        document.getElementById("whatsapp-link").href = "https://wa.me/" + phone + "?text=" + encodeURIComponent(d.message);
+        document.getElementById("sms-link").href = "sms:+" + phone + "?body=" + encodeURIComponent(d.message);
+        var res = document.getElementById("kayit-sonuc"); res.hidden = false; res.focus();
+        if (d.usernameTaken) show(kmsg, "\u201C" + d.usernameTaken + "\u201D kullanımda olduğu için kullanıcı adı " + d.member.memberNo + " verildi.", "warn");
+        kf.reset(); sayac.textContent = "0 / 11";
+      }).catch(function(){ kbtn.disabled = false; kbtn.textContent = "Ortağı kaydet"; show(kmsg, window.uyeNetErr, "bad"); });
+    });
+    document.getElementById("kopyala-btn").addEventListener("click", function(){
+      var b = this, t = document.getElementById("kayit-metin").textContent;
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ b.textContent = "Kopyalandı"; }, function(){ b.textContent = "Kopyalanamadı, metni seçin"; });
+      setTimeout(function(){ b.textContent = "Mesajı kopyala"; }, 2000);
+    });
 
     document.getElementById("csv-btn").addEventListener("click", function(){
       var q = function(v){ v = v == null ? "" : String(v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };

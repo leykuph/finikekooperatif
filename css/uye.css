@@ -43,3 +43,11 @@
 .parsel-mini{margin:0;padding-left:18px;display:grid;gap:4px;font-size:var(--fs-xs)}
 .parsel-mini li span + .etiket,.ortak-tablo td span + .etiket{margin-left:8px}
 .etiket{display:inline-block;font-size:var(--fs-xs);font-weight:700;padding:1px 8px;border-radius:999px;border:1px solid var(--orange-ink);color:var(--orange-ink)}
+
+/* ---------- Yönetim: ortak kaydı ---------- */
+.kayit-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:900px){.kayit-grid{grid-template-columns:1fr}}
+.sonuc{gap:12px;border-color:var(--ok)}
+.sonuc h3{font-size:var(--fs-lg);color:var(--ok)}
+.hos-geldin{margin:0;padding:14px;white-space:pre-wrap;word-break:break-word;font:500 var(--fs-xs)/1.6 var(--font-mono);background:var(--bg);border:1px dashed var(--line);border-radius:var(--radius-sm)}
+.input.num{font-variant-numeric:tabular-nums;letter-spacing:.04em}
