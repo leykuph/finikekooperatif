@@ -1,6 +1,10 @@
 /* Ortak girişi ve ortak paneli. Oturum çerezi API alan adında, HttpOnly olarak tutulur. */
 (function(){
-  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? "http://localhost:8787" : "https://finike-api.leykuph.com";
+  /* Çerez için site ile API aynı alan adı altında olmalı: finikekooperatifi.com -> api.finikekooperatifi.com */
+  var host = location.hostname;
+  var API = /^(localhost|127\.0\.0\.1)$/.test(host) ? "http://localhost:8787"
+    : /(^|\.)finikekooperatifi\.com$/.test(host) ? "https://api.finikekooperatifi.com"
+    : "https://finike-api.leykuph.com";
   var NET_ERR = "Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.";
 
   function api(method, path, body){

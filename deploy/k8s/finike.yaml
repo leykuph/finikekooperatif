@@ -72,7 +72,8 @@ spec:
             - { name: PGUSER, value: finike }
             - name: PGPASSWORD
               valueFrom: { secretKeyRef: { name: finike-db, key: password } }
-            - { name: ALLOWED_ORIGINS, value: "https://finike.leykuph.com" }
+            - { name: ALLOWED_ORIGINS, value: "https://finikekooperatifi.com,https://finike.leykuph.com" }
+            - { name: SITE_URL, value: "https://finike.leykuph.com" }
             - { name: CLIENT_IP_HEADER, value: cf-connecting-ip }
           ports: [{ containerPort: 8787 }]
           readinessProbe:

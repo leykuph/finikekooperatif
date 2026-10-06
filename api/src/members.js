@@ -2,6 +2,8 @@
 import { pool, usernameCandidates } from "./db.js";
 import { INITIAL_PASSWORD_DAYS, hashPassword } from "./auth.js";
 
+const SITE_URL = (process.env.SITE_URL || "https://finikekooperatifi.com").replace(/\/$/, "");
+
 export function isValidName(n) {
   return /^[\p{L}][\p{L} .'-]*$/u.test(n) && n.length <= 60;
 }
@@ -42,7 +44,7 @@ export function welcomeMessage(fullName, username) {
   return `Sayın ${fullName},
 S.S. Finike Tarımsal Kalkınma Kooperatifi ortak panelindeki hesabınız açıldı.
 
-Giriş adresi: https://finike.leykuph.com/giris
+Giriş adresi: ${SITE_URL}/giris
 Kullanıcı adınız: ${username}
 İlk şifreniz: TC kimlik numaranız ve cep telefonunuzun son 4 hanesi, boşluksuz yan yana (ör. 12345678950 ve 0532 111 4567 için 123456789504567)
 
