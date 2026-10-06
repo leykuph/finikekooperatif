@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-<circle cx="32" cy="32" r="30" fill="#E0661A"/>
-<circle cx="32" cy="32" r="26.5" fill="none" stroke="#FFD9B0" stroke-width="4"/>
-<g stroke="#FFB067" stroke-width="2.4" stroke-linecap="round"><line x1="32" y1="32" x2="54.00" y2="32.00"/><line x1="32" y1="32" x2="49.80" y2="44.93"/><line x1="32" y1="32" x2="38.80" y2="52.92"/><line x1="32" y1="32" x2="25.20" y2="52.92"/><line x1="32" y1="32" x2="14.20" y2="44.93"/><line x1="32" y1="32" x2="10.00" y2="32.00"/><line x1="32" y1="32" x2="14.20" y2="19.07"/><line x1="32" y1="32" x2="25.20" y2="11.08"/><line x1="32" y1="32" x2="38.80" y2="11.08"/><line x1="32" y1="32" x2="49.80" y2="19.07"/></g>
-<circle cx="32" cy="32" r="3.2" fill="#FFD9B0"/>
-</svg>
