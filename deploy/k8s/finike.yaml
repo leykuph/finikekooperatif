@@ -1,5 +1,6 @@
-# S.S. Finike Tarımsal Kalkınma Kooperatifi: ortak girişi API'si + PostgreSQL + Cloudflare Tunnel
-# Gizli değerler (veritabanı şifresi, tünel jetonu) bu dosyada değil; deploy/README.md'deki komutlarla oluşturulur.
+# S.S. Finike Tarımsal Kalkınma Kooperatifi: ortak girişi API'si + PostgreSQL
+# API, Bevel'deki Cloudflare tüneline NodePort 30878 üzerinden bağlanır (finike-api.leykuph.com).
+# Veritabanı şifresi bu dosyada değil; deploy/README.md'deki komutla oluşturulur.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -96,31 +97,6 @@ metadata:
   name: finike-api
   namespace: finike
 spec:
+  type: NodePort
   selector: { app: finike-api }
-  ports: [{ port: 80, targetPort: 8787 }]
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cloudflared
-  namespace: finike
-spec:
-  replicas: 1
-  selector: { matchLabels: { app: cloudflared } }
-  template:
-    metadata: { labels: { app: cloudflared } }
-    spec:
-      containers:
-        - name: cloudflared
-          image: cloudflare/cloudflared:latest
-          args: ["tunnel", "--no-autoupdate", "--metrics", "0.0.0.0:2000", "run"]
-          env:
-            - name: TUNNEL_TOKEN
-              valueFrom: { secretKeyRef: { name: cloudflared, key: token } }
-          livenessProbe:
-            httpGet: { path: /ready, port: 2000 }
-            periodSeconds: 30
-            failureThreshold: 3
-          resources:
-            requests: { cpu: 20m, memory: 32Mi }
-            limits: { memory: 128Mi }
+  ports: [{ port: 80, targetPort: 8787, nodePort: 30878 }]
