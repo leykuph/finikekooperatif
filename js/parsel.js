@@ -24,10 +24,29 @@
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       maxZoom: 19, attribution: "Uydu: Esri, Maxar, Earthstar Geographics · Parsel: TKGM"
     }).addTo(map);
+    // Yakınken parselin kendisi görünür; iğneler küçük parselleri örtmesin diye gizlenir.
+    function pins(){ map.getContainer().classList.toggle("yakin", map.getZoom() >= 17); }
+    map.on("zoomend", pins); pins();
     return map;
   }
-  var STYLE = {color: "#FFB067", weight: 2, fillColor: "#E0661A", fillOpacity: .25};
-  var PREVIEW = {color: "#FFFFFF", weight: 2, dashArray: "6 4", fillColor: "#FFFFFF", fillOpacity: .15};
+  // Uydu görüntüsünde seçilsin diye parlak sarı çizgi + altında koyu hale.
+  var STYLE = {color: "#FFD23F", weight: 3, opacity: 1, fillColor: "#FFD23F", fillOpacity: .3};
+  var SELECTED = {color: "#FFFFFF", weight: 4, fillColor: "#FFFFFF", fillOpacity: .4};
+  var HALO = {color: "#000000", weight: 7, opacity: .5, fill: false};
+
+  // Parseli çizer; uzaktan da görünsün diye ortasına iğne koyar (numaralı ya da nokta).
+  // İğneye tıklayınca parsele yakınlaşır. Geometri yoksa null döner.
+  function drawParcel(map, layer, p, tip, num){
+    if (!p.geometry) return null;
+    L.geoJSON(p.geometry, {style: HALO, interactive: false}).addTo(layer);
+    var shape = L.geoJSON(p.geometry, {style: STYLE}).bindTooltip(tip).addTo(layer);
+    var icon = L.divIcon({className: "parsel-pin" + (num ? "" : " nokta"), html: num ? "<span>" + num + "</span>" : "",
+      iconSize: num ? [28, 28] : [14, 14]});
+    var pin = L.marker(shape.getBounds().getCenter(), {icon: icon, title: tip, riseOnHover: true}).addTo(layer);
+    pin.on("click", function(){ map.fitBounds(shape.getBounds(), {maxZoom: 18}); });
+    return shape;
+  }
+  var PREVIEW = {color: "#FFFFFF", weight: 3, dashArray: "8 6", fillColor: "#FFFFFF", fillOpacity: .2};
 
   function details(p){
     var dl = el("dl", {"class": "parsel-dl"});
@@ -58,7 +77,7 @@
           (trees.count ? " · " + num(trees.count) + " ağaç · tahmini ~" + num(trees.tons, 2) + " ton" : "")
           : "Henüz parsel eklemediniz. Sağdaki formdan ilk parselinizi ekleyin.";
         parcels.forEach(function(p){
-          var shape = p.geometry ? L.geoJSON(p.geometry, {style: STYLE}).bindTooltip(label(p)).addTo(layer) : null;
+          var no = parcels.indexOf(p) + 1, shape = drawParcel(map, layer, p, no + ". " + label(p), no);
           var go = el("button", {"class": "btn btn-ghost btn-sm", type: "button", text: "Haritada göster"});
           var del = el("button", {"class": "btn btn-ghost btn-sm danger", type: "button", text: "Kaldır"});
           go.disabled = !shape;
@@ -70,7 +89,8 @@
               parcels = parcels.filter(function(x){ return x.id !== p.id; }); render();
             }).catch(function(){ alert(window.uyeNetErr); });
           });
-          list.appendChild(el("article", {"class": "card parsel-card"}, [details(p), treeSection(p), el("div", {"class": "btn-row"}, [go, del])]));
+          var badge = el("span", {"class": "parsel-no", "aria-hidden": "true", text: String(no)});
+          list.appendChild(el("article", {"class": "card parsel-card"}, [badge, details(p), treeSection(p), el("div", {"class": "btn-row"}, [go, del])]));
         });
         if (layer.getLayers().length) map.fitBounds(layer.getBounds(), {maxZoom: 17, padding: [20, 20]});
       }
@@ -112,7 +132,7 @@
           msg,
           el("div", {"class": "btn-row"}, [save, cancel])
         ]);
-        var open = el("button", {"class": "btn btn-ghost btn-sm", type: "button", text: "+ Ağaç ekle"});
+        var open = el("button", {"class": "agac-ekle", type: "button", text: "+ Ağaç ekle (cins, sayı, yaş, tonaj)"});
         function toggle(on){ form.hidden = !on; open.hidden = on; msg.hidden = true; if (on) form.querySelector("input").focus(); else form.reset(); }
         open.addEventListener("click", function(){ toggle(true); });
         cancel.addEventListener("click", function(){ toggle(false); });
@@ -155,7 +175,7 @@
           found = q;
           var info = document.getElementById("onizleme-bilgi"); info.replaceWith(Object.assign(details(d.parcel), {id: "onizleme-bilgi"}));
           box.hidden = false;
-          if (d.parcel.geometry) { preview = L.geoJSON(d.parcel.geometry, {style: PREVIEW}).addTo(map); map.fitBounds(preview.getBounds(), {maxZoom: 18}); }
+          if (d.parcel.geometry) { preview = L.featureGroup([L.geoJSON(d.parcel.geometry, {style: HALO, interactive: false}), L.geoJSON(d.parcel.geometry, {style: PREVIEW})]).addTo(map); map.fitBounds(preview.getBounds(), {maxZoom: 18}); }
         }).catch(function(){ btn.disabled = false; btn.textContent = "Sorgula"; show(msg, window.uyeNetErr, "bad"); });
       });
 
@@ -174,6 +194,6 @@
   }
 
   // Yönetim sayfaları (js/yonetim.js) aynı yardımcıları kullanır.
-  window.Parsel = {el: el, dekar: dekar, m2: m2, label: label, makeMap: makeMap, STYLE: STYLE, details: details, show: show,
+  window.Parsel = {el: el, dekar: dekar, m2: m2, label: label, makeMap: makeMap, STYLE: STYLE, SELECTED: SELECTED, drawParcel: drawParcel, details: details, show: show,
     num: num, treeTotals: treeTotals, treeText: treeText};
 })();

@@ -293,8 +293,7 @@
       var rows = visible();
       layer.clearLayers(); tbody2.textContent = ""; selected = null;
       rows.forEach(function(x){
-        var shape = x.p.geometry ? L.geoJSON(x.p.geometry, {style: P.STYLE})
-          .bindTooltip(x.m.fullName + " · " + label(x.p) + " · " + dekar(x.p.areaM2)).addTo(layer) : null;
+        var shape = P.drawParcel(map, layer, x.p, x.m.fullName + " · " + label(x.p) + " · " + dekar(x.p.areaM2));
         var go = el("button", {"class": "satir-ac", type: "button", text: x.m.fullName});
         var tr = el("tr", {"class": "tiklanir"}, [
           el("td", {}, [go]),
@@ -309,7 +308,7 @@
           tbody2.querySelectorAll("tr.secili").forEach(function(r){ r.classList.remove("secili"); });
           tr.classList.add("secili");
           if (selected) selected.setStyle(P.STYLE);
-          selected = shape; shape.setStyle({color: "#FFFFFF", weight: 4, fillOpacity: .4}); shape.bringToFront();
+          selected = shape; shape.setStyle(P.SELECTED); shape.bringToFront();
           map.fitBounds(shape.getBounds(), {maxZoom: 18}); shape.openTooltip();
           document.getElementById("harita").scrollIntoView({behavior: "smooth", block: "center"});
         };

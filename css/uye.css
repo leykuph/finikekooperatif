@@ -28,6 +28,7 @@
 .parsel-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
 .parsel-card{gap:14px}
 .parsel-dl{display:grid;gap:8px;margin:0}
+.parsel-card > .parsel-dl{padding-right:30px}
 .parsel-dl div{display:grid;grid-template-columns:72px 1fr;gap:10px}
 .parsel-dl dt{font-size:var(--fs-xs);color:var(--muted);padding-top:2px}
 .parsel-dl dd{margin:0;font-weight:600;font-size:var(--fs-sm)}
@@ -93,3 +94,13 @@
 .agac-sil:focus-visible{outline:2px solid var(--leaf);outline-offset:1px}
 .agac-form{display:grid;gap:12px}
 .agac-mini{margin:2px 0 4px;padding-left:16px;color:var(--muted)}
+
+/* ---------- Haritada parsel iğneleri ve kart numarası ---------- */
+.parsel-pin{display:grid;place-items:center;border-radius:50%;background:#FFD23F;border:2px solid #1B1B1B;box-shadow:0 0 0 2px #FFFFFF,0 2px 6px rgba(0,0,0,.6);color:#1B1B1B;font:800 13px/1 var(--font-body,system-ui)}
+.parsel-pin.nokta{border-width:2px}
+.parsel-card{position:relative}
+.parsel-no{position:absolute;top:14px;right:14px;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#FFD23F;color:#1B1B1B;border:2px solid #1B1B1B;font-weight:800;font-size:13px}
+.agac-ekle{justify-self:stretch;padding:10px 14px;border:1.5px dashed var(--orange-ink);border-radius:var(--radius-sm);background:color-mix(in srgb,var(--orange) 8%,transparent);color:var(--orange-ink);font-family:inherit;font-weight:700;font-size:var(--fs-sm);line-height:1.3;cursor:pointer;text-align:center}
+.agac-ekle:hover{background:color-mix(in srgb,var(--orange) 16%,transparent)}
+.agac-ekle:focus-visible{outline:2px solid var(--leaf);outline-offset:2px}
+.map.yakin .parsel-pin{opacity:0;pointer-events:none}
