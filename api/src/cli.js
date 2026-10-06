@@ -71,6 +71,10 @@ async function run([cmd, ...args]) {
     case "ekle": {
       const firstName = (args[0] || "").trim(), lastName = (args[1] || "").trim();
       if (args.length < 2 || args.length > 4) return fail(USAGE);
+      const nameOk = (n) => /^[\p{L}][\p{L} .'-]*$/u.test(n);
+      if (!nameOk(firstName) || !nameOk(lastName)) {
+        return fail(`Ad ve soyad yalnızca harflerden oluşmalı: ekle "Ahmet" "Yılmaz"\n\n${USAGE}`);
+      }
       const free = await freeUsername(firstName, lastName);
       if (!free) return fail(USAGE);
       const password = await askInitialPassword(args[2], args[3]);
