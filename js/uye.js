@@ -53,19 +53,27 @@
       if (!d.member) { location.replace("/giris"); return; }
       document.getElementById("ad-soyad").textContent = d.member.fullName;
       document.getElementById("ortak-no-goster").textContent = d.member.memberNo;
-      document.getElementById("sifre-uyari").hidden = !d.member.mustChangePassword;
-      document.getElementById("yonetim-link").hidden = !d.member.isAdmin;
+      member = d.member;
       loading.hidden = true; panel.hidden = false;
-      if (d.member.mustChangePassword) document.getElementById("mevcut-sifre").focus();
-      else openParcels();
+      if (member.mustChangePassword) firstLogin(true); else unlock();
     }).catch(function(){ loading.textContent = NET_ERR; });
 
     document.getElementById("cikis-btn").addEventListener("click", function(){
       api("POST", "/auth/logout", {}).finally(function(){ location.href = "/giris"; });
     });
 
-    // Parseller yalnızca kalıcı şifreyle açılır (js/parsel.js)
-    var openParcels = function(){
+    // İlk girişte (geçici şifre) panelde yalnızca şifre belirleme görünür; parseller ve yönetim
+    // bağlantısı kalıcı şifreden sonra açılır (js/parsel.js "parseller:ac" olayını dinler).
+    var member = null;
+    var firstLogin = function(on){
+      document.getElementById("sifre-uyari").hidden = !on;
+      document.getElementById("sifre").textContent = on ? "Yeni Şifrenizi Belirleyin" : "Şifre Değiştir";
+      document.getElementById("mevcut-sifre-etiket").textContent = on ? "İlk giriş şifreniz (TC + telefonun son 4 hanesi)" : "Mevcut şifre";
+      if (on) document.getElementById("mevcut-sifre").focus();
+    };
+    var unlock = function(){
+      firstLogin(false);
+      document.getElementById("yonetim-link").hidden = !member.isAdmin;
       var sec = document.getElementById("parsellerim");
       if (!sec.hidden) return;
       sec.hidden = false; document.dispatchEvent(new Event("parseller:ac"));
@@ -83,7 +91,8 @@
         busy(sbtn, false, "Şifreyi kaydet");
         if (d.status === 401) { location.replace("/giris"); return; }
         if (!d.ok) { show(msg, d.error || NET_ERR, "bad"); return; }
-        form.reset(); document.getElementById("sifre-uyari").hidden = true; openParcels();
+        form.reset(); var wasFirst = member.mustChangePassword; member.mustChangePassword = false; unlock();
+        if (wasFirst) { show(msg, "Şifreniz kaydedildi. Artık bu şifreyle giriş yapacaksınız.", "ok"); return; }
         show(msg, "Şifreniz değişti. Başka cihazlarda açık kalan oturumlar kapatıldı.", "ok");
       }).catch(function(){ busy(sbtn, false, "Şifreyi kaydet"); show(msg, NET_ERR, "bad"); });
     });

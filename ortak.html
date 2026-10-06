@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="css/uye.css?v=3">
 <script src="js/main.js?v=2" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
-<script src="js/uye.js?v=3" defer></script>
+<script src="js/uye.js?v=4" defer></script>
 <script src="js/parsel.js?v=2" defer></script>
 </head>
 <body>
@@ -67,7 +67,7 @@
         </div>
       </div>
 
-      <div class="notice warn" id="sifre-uyari" hidden>İlk giriş şifrenizle girdiniz. Parsellerinizi görmeden önce kendinize ait yeni bir şifre belirleyin. Mevcut şifre alanına TC kimlik numaranızı ve telefonunuzun son 4 hanesini yazın.</div>
+      <div class="notice warn" id="sifre-uyari" hidden>Hoş geldiniz! Panelinizi kullanmaya başlamadan önce kendinize ait yeni bir şifre belirleyin. İlk alana, girişte kullandığınız şifreyi (TC kimlik numaranız ve telefonunuzun son 4 hanesi) yazın.</div>
 
       <section class="panel-block" id="parsellerim" aria-labelledby="parsel-baslik" hidden>
         <div class="block-head">
@@ -105,7 +105,7 @@
           <h2 style="font-size:var(--fs-lg)" id="sifre">Şifre Değiştir</h2>
           <div class="notice" id="sifre-mesaj" role="status" tabindex="-1" hidden></div>
           <div class="field">
-            <label for="mevcut-sifre">Mevcut şifre</label>
+            <label for="mevcut-sifre" id="mevcut-sifre-etiket">Mevcut şifre</label>
             <input class="input" id="mevcut-sifre" type="password" autocomplete="current-password" required>
           </div>
           <div class="field">
