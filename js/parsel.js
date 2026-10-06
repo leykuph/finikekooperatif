@@ -29,8 +29,8 @@
     map.on("zoomend", pins); pins();
     return map;
   }
-  // Uydu görüntüsünde seçilsin diye parlak sarı çizgi + altında koyu hale.
-  var STYLE = {color: "#FFD23F", weight: 3, opacity: 1, fillColor: "#FFD23F", fillOpacity: .3};
+  // TKGM Parsel Sorgu'daki gibi kırmızı çizgi; uydu görüntüsünde seçilsin diye altında koyu hale.
+  var STYLE = {color: "#FF0000", weight: 3, opacity: 1, fillColor: "#FF0000", fillOpacity: .2};
   var SELECTED = {color: "#FFFFFF", weight: 4, fillColor: "#FFFFFF", fillOpacity: .4};
   var HALO = {color: "#000000", weight: 7, opacity: .5, fill: false};
 
