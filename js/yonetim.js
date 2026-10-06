@@ -26,6 +26,35 @@
   }
   function areaCell(m2){ return m2 == null ? "" : String(Math.round(m2 * 100) / 100).replace(".", ","); }
 
+  function validTc(tc){
+    if (!/^[1-9]\d{10}$/.test(tc)) return false;
+    var d = tc.split("").map(Number), odd = d[0] + d[2] + d[4] + d[6] + d[8], even = d[1] + d[3] + d[5] + d[7];
+    return ((odd * 7 - even) % 10 + 10) % 10 === d[9] && d.slice(0, 10).reduce(function(a, b){ return a + b; }, 0) % 10 === d[10];
+  }
+  function mobile(v){ var d = v.replace(/^(90|0)/, ""); return /^5\d{9}$/.test(d) ? d : null; }
+  // Yalnızca rakam; en fazla 11 hane (yapıştırılan metindeki boşluk ve işaretler atılır)
+  function digitsOnly(inp, onChange){
+    inp.addEventListener("input", function(){
+      var v = inp.value.replace(/\D/g, "").slice(0, 11);
+      if (v !== inp.value) inp.value = v;
+      if (onChange) onChange(v);
+    });
+  }
+  // Ortağa gidecek mesaj: metin, kopyala, WhatsApp ve SMS bağlantıları
+  function share(ids, message, tel){
+    var phone = "90" + mobile(tel);
+    document.getElementById(ids.text).textContent = message;
+    document.getElementById(ids.wa).href = "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+    document.getElementById(ids.sms).href = "sms:+" + phone + "?body=" + encodeURIComponent(message);
+  }
+  function copyButton(btnId, textId){
+    document.getElementById(btnId).addEventListener("click", function(){
+      var b = this, label = b.textContent, t = document.getElementById(textId).textContent;
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ b.textContent = "Kopyalandı"; }, function(){ b.textContent = "Kopyalanamadı, metni seçin"; });
+      setTimeout(function(){ b.textContent = label; }, 2000);
+    });
+  }
+
   function dialog(id){
     var d = document.getElementById(id);
     d.querySelectorAll("[data-kapat]").forEach(function(b){ b.addEventListener("click", function(){ d.close(); }); });
@@ -45,20 +74,22 @@
     api("GET", "/auth/me").then(function(d){
       if (!d.member) { location.replace("/giris"); return; }
       if (!d.member.isAdmin || d.member.mustChangePassword) { location.replace("/ortak"); return; }
-      load();
+      load(d.member);
     }).catch(function(){ loading.textContent = window.uyeNetErr; });
   }
 
   /* ---------- Ortaklar ---------- */
   var membersRoot = document.getElementById("ortaklar-sayfa");
   if (membersRoot) {
-    var members = [], search = document.getElementById("ara"), filter = document.getElementById("durum-filtre");
+    var members = [], me = null, current = null, search = document.getElementById("ara"), filter = document.getElementById("durum-filtre");
     var tbody = document.getElementById("ortak-satirlar"), empty = document.getElementById("bos");
 
-    var load = function(){
+    var load = function(self){
+      if (self) me = self;
       return api("GET", "/admin/members").then(function(d){
         if (!d.members) { loading.textContent = d.error || window.uyeNetErr; return; }
         members = d.members; loading.hidden = true; membersRoot.hidden = false; render();
+        if (current) current = members.filter(function(m){ return m.memberNo === current.memberNo; })[0] || null;
       }).catch(function(){ loading.textContent = window.uyeNetErr; });
     };
     guard(load);
@@ -93,7 +124,19 @@
     filter.addEventListener("change", render);
 
     var memberDlg = dialog("ortak-pencere");
+    var actMsg = document.getElementById("islem-mesaj"), resetForm2 = document.getElementById("sifirla-form"), resetResult = document.getElementById("sifirla-sonuc");
+    var toggleBtn = document.getElementById("aktiflik-btn"), sTc = document.getElementById("s-tc"), sTel = document.getElementById("s-tel");
+    digitsOnly(sTc); digitsOnly(sTel);
+    copyButton("s-kopyala", "s-metin");
+    memberDlg.addEventListener("close", function(){ current = null; });
+
     function openMember(m){
+      current = m; fillMember(m);
+      actMsg.hidden = true; resetForm2.hidden = true; resetForm2.reset(); resetResult.hidden = true;
+      document.getElementById("islemler").hidden = false;
+      memberDlg.showModal();
+    }
+    function fillMember(m){
       document.getElementById("ortak-baslik").textContent = m.fullName;
       var dl = document.getElementById("ortak-bilgi"); dl.textContent = "";
       [["Kullanıcı adı", m.memberNo], ["Durum", pill(m.status)], ["Yönetici", m.isAdmin ? "Evet" : "Hayır"],
@@ -108,8 +151,47 @@
         m.parcels.forEach(function(p){ ul.appendChild(el("li", {text: label(p) + " · " + (p.nitelik || "-") + " · " + (p.mevkii || "-") + " · " + dekar(p.areaM2)})); });
         box.appendChild(ul);
       }
-      memberDlg.showModal();
+      var closed = m.status === "kapali";
+      toggleBtn.textContent = closed ? "Hesabı aç" : "Hesabı kapat";
+      toggleBtn.classList.toggle("danger", !closed);
+      toggleBtn.hidden = !closed && me && m.memberNo === me.memberNo;   // kendi hesabını kapatamaz
     }
+
+    document.getElementById("sifirla-ac").addEventListener("click", function(){
+      actMsg.hidden = true; resetResult.hidden = true; resetForm2.hidden = false; document.getElementById("islemler").hidden = true; sTc.focus();
+    });
+    document.getElementById("sifirla-vazgec").addEventListener("click", function(){
+      resetForm2.hidden = true; resetForm2.reset(); document.getElementById("islemler").hidden = false;
+    });
+    resetForm2.addEventListener("submit", function(e){
+      e.preventDefault();
+      var m = current, btn = document.getElementById("sifirla-btn");
+      if (!validTc(sTc.value)) { show(actMsg, "TC kimlik numarası geçersiz. 11 haneyi kontrol edin.", "bad"); sTc.focus(); return; }
+      if (!mobile(sTel.value)) { show(actMsg, "Cep telefonu 05xx xxx xx xx biçiminde olmalı.", "bad"); sTel.focus(); return; }
+      btn.disabled = true; btn.textContent = "Sıfırlanıyor…";
+      api("POST", "/admin/members/" + encodeURIComponent(m.memberNo) + "/reset", {tc: sTc.value, phone: sTel.value}).then(function(d){
+        btn.disabled = false; btn.textContent = "Şifreyi sıfırla";
+        if (!d.ok) { show(actMsg, d.error || window.uyeNetErr, "bad"); return; }
+        share({text: "s-metin", wa: "s-whatsapp", sms: "s-sms"}, d.message, sTel.value);
+        resetForm2.reset(); resetForm2.hidden = true; resetResult.hidden = false; document.getElementById("islemler").hidden = false;
+        show(actMsg, "Şifre sıfırlandı. Aşağıdaki mesajı ortağa gönderin; mesajda gizli bilgi yoktur.", "ok");
+        load().then(function(){ if (current) fillMember(current); });
+      }).catch(function(){ btn.disabled = false; btn.textContent = "Şifreyi sıfırla"; show(actMsg, window.uyeNetErr, "bad"); });
+    });
+
+    toggleBtn.addEventListener("click", function(){
+      var m = current, activate = m.status === "kapali";
+      if (!confirm(activate ? m.fullName + " hesabı yeniden açılsın mı?"
+        : m.fullName + " hesabı kapatılsın mı? Ortak giriş yapamaz, açık oturumları sonlanır. Kayıtları ve parselleri silinmez.")) return;
+      toggleBtn.disabled = true;
+      api("POST", "/admin/members/" + encodeURIComponent(m.memberNo) + "/active", {active: activate}).then(function(d){
+        toggleBtn.disabled = false;
+        if (!d.ok) { show(actMsg, d.error || window.uyeNetErr, "bad"); return; }
+        resetResult.hidden = true;
+        show(actMsg, activate ? "Hesap yeniden açıldı." : "Hesap kapatıldı.", "ok");
+        load().then(function(){ if (current) fillMember(current); });
+      }).catch(function(){ toggleBtn.disabled = false; show(actMsg, window.uyeNetErr, "bad"); });
+    });
 
     document.getElementById("csv-btn").addEventListener("click", function(){
       var rows = [["Ad Soyad", "Kullanıcı adı", "Durum", "Yönetici", "Parsel sayısı", "Toplam alan (m²)", "Kayıt tarihi", "Son giriş"]];
@@ -128,20 +210,8 @@
     document.getElementById("yeni-btn").addEventListener("click", function(){ resetForm(); regDlg.showModal(); document.getElementById("k-ad").focus(); });
     document.getElementById("yeni-kayit-btn").addEventListener("click", function(){ resetForm(); document.getElementById("k-ad").focus(); });
 
-    function validTc(tc){
-      if (!/^[1-9]\d{10}$/.test(tc)) return false;
-      var d = tc.split("").map(Number), odd = d[0] + d[2] + d[4] + d[6] + d[8], even = d[1] + d[3] + d[5] + d[7];
-      return ((odd * 7 - even) % 10 + 10) % 10 === d[9] && d.slice(0, 10).reduce(function(a, b){ return a + b; }, 0) % 10 === d[10];
-    }
-    function mobile(v){ var d = v.replace(/^(90|0)/, ""); return /^5\d{9}$/.test(d) ? d : null; }
-    // Yalnızca rakam; en fazla 11 hane (yapıştırılan metindeki boşluk ve işaretler atılır)
-    [tcIn, telIn].forEach(function(inp){
-      inp.addEventListener("input", function(){
-        var v = inp.value.replace(/\D/g, "").slice(0, 11);
-        if (v !== inp.value) inp.value = v;
-        if (inp === tcIn) counter.textContent = v.length + " / 11";
-      });
-    });
+    digitsOnly(tcIn, function(v){ counter.textContent = v.length + " / 11"; });
+    digitsOnly(telIn);
 
     kf.addEventListener("submit", function(e){
       e.preventDefault();
@@ -154,21 +224,14 @@
       api("POST", "/admin/members", {firstName: first, lastName: last, tc: tc, phone: tel}).then(function(d){
         kbtn.disabled = false; kbtn.textContent = "Ortağı kaydet";
         if (!d.member) { show(kmsg, d.error || window.uyeNetErr, "bad"); return; }
-        var phone = "90" + mobile(tel);
         document.getElementById("kayit-tamam").textContent = d.member.fullName + " kaydedildi. Kullanıcı adı: " + d.member.memberNo +
           (d.usernameTaken ? " (“" + d.usernameTaken + "” kullanımda olduğu için)" : "");
-        document.getElementById("kayit-metin").textContent = d.message;
-        document.getElementById("whatsapp-link").href = "https://wa.me/" + phone + "?text=" + encodeURIComponent(d.message);
-        document.getElementById("sms-link").href = "sms:+" + phone + "?body=" + encodeURIComponent(d.message);
+        share({text: "kayit-metin", wa: "whatsapp-link", sms: "sms-link"}, d.message, tel);
         kf.reset(); kf.hidden = true; result.hidden = false; result.focus();
         load();
       }).catch(function(){ kbtn.disabled = false; kbtn.textContent = "Ortağı kaydet"; show(kmsg, window.uyeNetErr, "bad"); });
     });
-    document.getElementById("kopyala-btn").addEventListener("click", function(){
-      var b = this, t = document.getElementById("kayit-metin").textContent;
-      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function(){ b.textContent = "Kopyalandı"; }, function(){ b.textContent = "Kopyalanamadı, metni seçin"; });
-      setTimeout(function(){ b.textContent = "Mesajı kopyala"; }, 2000);
-    });
+    copyButton("kopyala-btn", "kayit-metin");
   }
 
   /* ---------- Parseller ---------- */

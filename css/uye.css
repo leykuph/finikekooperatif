@@ -72,6 +72,8 @@
 .bilgi-dl dd{margin:0;font-weight:600}
 .hos-geldin{margin:0;padding:14px;white-space:pre-wrap;word-break:break-word;font:500 var(--fs-xs)/1.6 var(--font-mono);background:var(--bg);border:1px dashed var(--line);border-radius:var(--radius-sm)}
 .input.num{font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.islem-form{gap:14px;margin-top:16px;padding-top:16px;border-top:1.5px dashed var(--line)}
+#islem-mesaj{margin-bottom:12px}
 @media (max-width:640px){
   /* Dar ekranda ayrıntı sütunları gizlenir; ortağın bilgileri satıra dokununca açılır */
   .ortak-liste th:nth-child(n+4),.ortak-liste td:nth-child(n+4){display:none}

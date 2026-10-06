@@ -34,6 +34,9 @@ Site ile API aynı alan adı altında olmalıdır; oturum çerezi ancak böyle g
 
 ## Ortak Hesapları
 
+Ortak kaydı, şifre sıfırlama ve hesap kapatma/açma yönetim panelinden (`/yonetim`) yapılır. Aşağıdaki komutlar
+aynı işlemlerin sunucudan yapılabilen karşılıklarıdır (yönetici yetkisi vermek yalnızca komutla).
+
 Ortaklar kendileri kayıt olmaz; hesabı kooperatif açar. İlk giriş şifresi ortağın TC kimlik numarası + cep telefonunun
 son 4 hanesidir; komut bunları sorar ama kaydetmez, yalnızca şifrenin özeti saklanır. Ortağa yalnızca kullanıcı adını
 bildirmek yeterlidir; komutun yazdırdığı mesajda gizli bilgi yoktur.

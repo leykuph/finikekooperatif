@@ -1,7 +1,7 @@
 import http from "node:http";
 import { pool, migrate, normalizeMemberNo } from "./db.js";
 import { TkgmError, mahalleler, parsel as tkgmParsel } from "./tkgm.js";
-import { createMember, isValidName, welcomeMessage } from "./members.js";
+import { createMember, isValidName, resetMember, setMemberActive, welcomeMessage } from "./members.js";
 import {
   DUMMY_HASH, INITIAL_PASSWORD_MAX_FAILURES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH, initialPassword,
   hashPassword, hashToken, newSessionToken, verifyPassword,
@@ -351,6 +351,32 @@ async function addMember(req, res) {
   });
 }
 
+// Yönetimden şifre sıfırlama: yeni ilk şifre yine TC + telefonun son 4 hanesi (kaydedilmez, loglanmaz).
+async function resetMemberPassword(req, res, username) {
+  const admin = await requireMember(req, { admin: true });
+  const body = await readJson(req);
+  let password;
+  try {
+    password = initialPassword(body.tc, body.phone);
+  } catch (err) {
+    throw new HttpError(400, err.message);
+  }
+  const m = await resetMember(username, password);
+  if (!m) throw new HttpError(404, "Ortak bulunamadı.");
+  console.info(`şifre sıfırlandı: ${username} (yönetici=${admin.member_no})`);
+  send(res, 200, { ok: true, message: welcomeMessage(m.fullName, username, { reset: true }) });
+}
+
+async function setActive(req, res, username) {
+  const admin = await requireMember(req, { admin: true });
+  const { active } = await readJson(req);
+  if (typeof active !== "boolean") throw new HttpError(400, "İstek okunamadı.");
+  if (!active && username === admin.member_no) throw new HttpError(400, "Kendi hesabınızı kapatamazsınız.");
+  if (!(await setMemberActive(username, active))) throw new HttpError(404, "Ortak bulunamadı.");
+  console.info(`hesap ${active ? "açıldı" : "kapatıldı"}: ${username} (yönetici=${admin.member_no})`);
+  send(res, 200, { ok: true });
+}
+
 async function health(req, res) {
   await pool.query("SELECT 1");
   send(res, 200, { ok: true });
@@ -395,7 +421,10 @@ const server = http.createServer(async (req, res) => {
   if (req.method !== "GET" && !allowed) return send(res, 403, { error: "İzin verilmeyen kaynak." });
 
   const del = req.method === "DELETE" && path.match(/^\/parcels\/(\d+)$/);
-  const handler = del ? (rq, rs) => removeParcel(rq, rs, Number(del[1])) : routes[`${req.method} ${path}`];
+  const act = req.method === "POST" && path.match(/^\/admin\/members\/([a-z0-9]+)\/(reset|active)$/);
+  const handler = del ? (rq, rs) => removeParcel(rq, rs, Number(del[1]))
+    : act ? (rq, rs) => (act[2] === "reset" ? resetMemberPassword : setActive)(rq, rs, act[1])
+    : routes[`${req.method} ${path}`];
   if (!handler) return send(res, 404, { error: "Bulunamadı." });
   try {
     await handler(req, res);

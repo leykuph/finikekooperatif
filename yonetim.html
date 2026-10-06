@@ -17,7 +17,7 @@
 <script src="js/main.js?v=2" defer></script>
 <script src="js/uye.js?v=4" defer></script>
 <script src="js/parsel.js?v=3" defer></script>
-<script src="js/yonetim.js" defer></script>
+<script src="js/yonetim.js?v=2" defer></script>
 </head>
 <body>
 <a class="skip" href="#icerik">İçeriğe geç</a>
@@ -141,6 +141,31 @@
   <dl class="bilgi-dl" id="ortak-bilgi"></dl>
   <h3 class="pencere-alt">Parselleri</h3>
   <div id="ortak-parseller"></div>
+  <h3 class="pencere-alt">İşlemler</h3>
+  <div class="notice" id="islem-mesaj" role="status" tabindex="-1" hidden></div>
+  <div class="btn-row" id="islemler">
+    <button class="btn btn-ghost btn-sm" type="button" id="sifirla-ac">Şifreyi sıfırla</button>
+    <button class="btn btn-ghost btn-sm danger" type="button" id="aktiflik-btn">Hesabı kapat</button>
+  </div>
+  <form class="stack islem-form" id="sifirla-form" novalidate autocomplete="off" hidden>
+    <p class="muted small">Ortağın şifresi ilk giriş şifresine döner: TC kimlik no + cep telefonunun son 4 hanesi, 30 gün geçerli. Açık oturumları kapanır. TC ve telefon kaydedilmez.</p>
+    <div class="row-2">
+      <div class="field"><label for="s-tc">TC kimlik no</label><input class="input num" id="s-tc" inputmode="numeric" autocomplete="off" required></div>
+      <div class="field"><label for="s-tel">Cep telefonu</label><input class="input num" id="s-tel" type="tel" inputmode="numeric" placeholder="05xx xxx xx xx" autocomplete="off" required></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary btn-sm" type="submit" id="sifirla-btn">Şifreyi sıfırla</button>
+      <button class="btn btn-ghost btn-sm" type="button" id="sifirla-vazgec">Vazgeç</button>
+    </div>
+  </form>
+  <div class="stack" id="sifirla-sonuc" hidden style="gap:12px;margin-top:12px">
+    <pre class="hos-geldin" id="s-metin"></pre>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" type="button" id="s-kopyala">Mesajı kopyala</button>
+      <a class="btn btn-ghost btn-sm" id="s-whatsapp" target="_blank" rel="noopener">WhatsApp ile gönder</a>
+      <a class="btn btn-ghost btn-sm" id="s-sms">SMS ile gönder</a>
+    </div>
+  </div>
 </dialog>
 
 </main>

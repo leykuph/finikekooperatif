@@ -1,9 +1,9 @@
 // Ortak hesaplarını yönetme komutları. Sunucuda:
 //   kubectl -n finike exec deploy/finike-api -- node src/cli.js <komut> ...
 import { pool, migrate, normalizeMemberNo } from "./db.js";
-import { createMember, isValidName, welcomeMessage } from "./members.js";
+import { createMember, isValidName, resetMember, setMemberActive, welcomeMessage } from "./members.js";
 import {
-  INITIAL_PASSWORD_DAYS, INITIAL_PASSWORD_MAX_FAILURES, hashPassword, initialPassword, isValidTc, mobileDigits,
+  INITIAL_PASSWORD_DAYS, INITIAL_PASSWORD_MAX_FAILURES, initialPassword, isValidTc, mobileDigits,
 } from "./auth.js";
 
 const USAGE = `Kullanım:
@@ -25,9 +25,9 @@ function fail(msg) {
   process.exitCode = 1;
 }
 
-function printWelcome(fullName, memberNo) {
+function printWelcome(fullName, memberNo, options) {
   const line = "-".repeat(63);
-  console.log(`\n${line}\n${welcomeMessage(fullName, memberNo)}\n${line}`);
+  console.log(`\n${line}\n${welcomeMessage(fullName, memberNo, options)}\n${line}`);
 }
 
 // Yalnızca rakam kabul eden, en fazla `max` hane yazdıran alan: "TC kimlik no : 1234567____  7/11"
@@ -96,23 +96,15 @@ async function run([cmd, ...args]) {
       const { rows: found } = await pool.query("SELECT 1 FROM members WHERE member_no = $1", [memberNo]);
       if (!found[0]) return fail(`"${memberNo}" kullanıcı adlı ortak bulunamadı.`);
       const password = await askInitialPassword(args[1], args[2]);
-      const { rows } = await pool.query(
-        `UPDATE members SET password_hash = $1, must_change_password = true, failed_logins = 0,
-                initial_password_expires_at = now() + make_interval(days => $3)
-          WHERE member_no = $2 RETURNING id, full_name`,
-        [await hashPassword(password), memberNo, INITIAL_PASSWORD_DAYS]
-      );
-      if (!rows[0]) return fail(`"${memberNo}" kullanıcı adlı ortak bulunamadı.`);
-      await pool.query("DELETE FROM sessions WHERE member_id = $1", [rows[0].id]);
-      return printWelcome(rows[0].full_name, memberNo);
+      const m = await resetMember(memberNo, password);
+      if (!m) return fail(`"${memberNo}" kullanıcı adlı ortak bulunamadı.`);
+      return printWelcome(m.fullName, memberNo, { reset: true });
     }
     case "pasif":
     case "aktif": {
       if (!memberNo) return fail(USAGE);
       const active = cmd === "aktif";
-      const { rows } = await pool.query("UPDATE members SET active = $1 WHERE member_no = $2 RETURNING id", [active, memberNo]);
-      if (!rows[0]) return fail(`"${memberNo}" kullanıcı adlı ortak bulunamadı.`);
-      if (!active) await pool.query("DELETE FROM sessions WHERE member_id = $1", [rows[0].id]);
+      if (!(await setMemberActive(memberNo, active))) return fail(`"${memberNo}" kullanıcı adlı ortak bulunamadı.`);
       return console.log(`${memberNo} ${active ? "yeniden açıldı" : "kapatıldı"}.`);
     }
     case "yonetici": {

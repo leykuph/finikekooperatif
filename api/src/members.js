@@ -39,10 +39,31 @@ export async function createMember({ firstName, lastName, password, createdBy = 
   throw new Error("Kullanıcı adı ayrılamadı, tekrar deneyin.");
 }
 
+// İlk giriş şifresine döndürür ve açık oturumları kapatır. Ortak yoksa null.
+export async function resetMember(username, password) {
+  const { rows } = await pool.query(
+    `UPDATE members SET password_hash = $1, must_change_password = true, failed_logins = 0,
+            initial_password_expires_at = now() + make_interval(days => $3)
+      WHERE member_no = $2 RETURNING id, full_name`,
+    [await hashPassword(password), username, INITIAL_PASSWORD_DAYS]
+  );
+  if (!rows[0]) return null;
+  await pool.query("DELETE FROM sessions WHERE member_id = $1", [rows[0].id]);
+  return { fullName: rows[0].full_name };
+}
+
+// Hesabı kapatır/açar; kapatılan hesabın oturumları sonlanır. Ortak yoksa false.
+export async function setMemberActive(username, active) {
+  const { rows } = await pool.query("UPDATE members SET active = $1 WHERE member_no = $2 RETURNING id", [active, username]);
+  if (!rows[0]) return false;
+  if (!active) await pool.query("DELETE FROM sessions WHERE member_id = $1", [rows[0].id]);
+  return true;
+}
+
 // Gizli bilgi içermez; SMS, WhatsApp ya da sözlü olarak iletilebilir.
-export function welcomeMessage(fullName, username) {
+export function welcomeMessage(fullName, username, { reset = false } = {}) {
   return `Sayın ${fullName},
-S.S. Finike Tarımsal Kalkınma Kooperatifi ortak panelindeki hesabınız açıldı.
+S.S. Finike Tarımsal Kalkınma Kooperatifi ortak panelindeki ${reset ? "şifreniz sıfırlandı" : "hesabınız açıldı"}.
 
 Giriş adresi: ${SITE_URL}/giris
 Kullanıcı adınız: ${username}
