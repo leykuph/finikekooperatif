@@ -2,7 +2,7 @@ import http from "node:http";
 import { pool, migrate, normalizeMemberNo } from "./db.js";
 import { TkgmError, mahalleler, parsel as tkgmParsel } from "./tkgm.js";
 import {
-  DUMMY_HASH, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH,
+  DUMMY_HASH, INITIAL_PASSWORD_MAX_FAILURES, MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH,
   hashPassword, hashToken, newSessionToken, verifyPassword,
 } from "./auth.js";
 
@@ -163,16 +163,28 @@ async function login(req, res) {
   }
 
   const { rows } = await pool.query(
-    "SELECT id, member_no, full_name, must_change_password, is_admin, password_hash FROM members WHERE member_no = $1 AND active",
+    `SELECT id, member_no, full_name, must_change_password, is_admin, password_hash, failed_logins,
+            initial_password_expires_at < now() AS initial_expired
+       FROM members WHERE member_no = $1 AND active`,
     [memberNo]
   );
   const member = rows[0];
-  const ok = await verifyPassword(password, member ? member.password_hash : DUMMY_HASH);
+  // İlk şifre (TC + telefon) tahmin edilebilir bilgilerden oluştuğu için süreli ve deneme sayısı sınırlıdır.
+  // Kalıcı şifresi olan hesaplar kilitlenmez; aksi hâlde başkası hatalı deneyerek ortağı dışarıda bırakabilirdi.
+  const initial = member?.must_change_password;
+  if (initial && member.failed_logins >= INITIAL_PASSWORD_MAX_FAILURES) {
+    throw new HttpError(423, "Çok fazla hatalı deneme yapıldığı için hesabınız kilitlendi. Kooperatifi arayın.");
+  }
+  const ok = await verifyPassword(initial ? password.replace(/\s/g, "") : password, member ? member.password_hash : DUMMY_HASH);
   if (!member || !ok) {
     recordFailure("ip", ip);
     recordFailure("member", memberNo);
+    if (member) await pool.query("UPDATE members SET failed_logins = failed_logins + 1 WHERE id = $1", [member.id]);
     console.warn(`giriş başarısız: ortak=${memberNo} ip=${ip}`);
     throw new HttpError(401, "Kullanıcı adı veya şifre hatalı.");
+  }
+  if (initial && member.initial_expired) {
+    throw new HttpError(401, "İlk giriş şifrenizin süresi doldu. Yenilemesi için kooperatifi arayın.");
   }
 
   failures.delete(`member:${memberNo}`);
@@ -181,7 +193,7 @@ async function login(req, res) {
     `INSERT INTO sessions (token_hash, member_id, expires_at) VALUES ($1, $2, now() + make_interval(days => $3))`,
     [hashToken(token), member.id, SESSION_DAYS]
   );
-  await pool.query("UPDATE members SET last_login_at = now() WHERE id = $1", [member.id]);
+  await pool.query("UPDATE members SET last_login_at = now(), failed_logins = 0 WHERE id = $1", [member.id]);
   console.info(`giriş: ortak=${memberNo} ip=${ip}`);
   send(res, 200, { member: publicMember(member) }, { "Set-Cookie": sessionCookie(token, SESSION_DAYS * 86400) });
 }
@@ -202,7 +214,8 @@ async function changePassword(req, res) {
   const session = await currentSession(req);
   if (!session) throw new HttpError(401, "Oturumunuz kapanmış. Lütfen yeniden giriş yapın.");
   const body = await readJson(req);
-  const current = typeof body.currentPassword === "string" ? body.currentPassword : "";
+  let current = typeof body.currentPassword === "string" ? body.currentPassword : "";
+  if (session.member.must_change_password) current = current.replace(/\s/g, "");
   const next = typeof body.newPassword === "string" ? body.newPassword : "";
 
   if (next.length < MIN_PASSWORD_LENGTH || next.length > MAX_PASSWORD_LENGTH) {
@@ -214,9 +227,11 @@ async function changePassword(req, res) {
   }
   if (next === current) throw new HttpError(400, "Yeni şifre mevcut şifrenizden farklı olmalı.");
 
-  await pool.query("UPDATE members SET password_hash = $1, must_change_password = false WHERE id = $2", [
-    await hashPassword(next), session.member.id,
-  ]);
+  await pool.query(
+    `UPDATE members SET password_hash = $1, must_change_password = false, initial_password_expires_at = NULL, failed_logins = 0
+      WHERE id = $2`,
+    [await hashPassword(next), session.member.id]
+  );
   // Başka cihazlarda açık kalan oturumlar kapatılır.
   await pool.query("DELETE FROM sessions WHERE member_id = $1 AND token_hash <> $2", [session.member.id, session.tokenHash]);
   console.info(`şifre değişti: ortak=${session.member.member_no}`);

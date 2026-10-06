@@ -1,4 +1,4 @@
-import { createHash, randomBytes, randomInt, scrypt, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 
 const scryptAsync = promisify(scrypt);
@@ -38,14 +38,23 @@ export function hashToken(token) {
   return createHash("sha256").update(token).digest("hex");
 }
 
-// Karışabilecek karakterler (0/O, 1/l/I) olmadan, telefonda kolay yazılan geçici şifre: xxxx-xxxx-xxxx
-const ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
-export function temporaryPassword() {
-  const groups = [];
-  for (let g = 0; g < 3; g++) {
-    let s = "";
-    for (let i = 0; i < 4; i++) s += ALPHABET[randomInt(ALPHABET.length)];
-    groups.push(s);
-  }
-  return groups.join("-");
+// İlk şifre: TC kimlik numarası + cep telefonunun son 4 hanesi (ör. 12345678950 + 4567).
+// TC ve telefon hiçbir yerde saklanmaz; yalnızca bu şifrenin özeti tutulur.
+export const INITIAL_PASSWORD_DAYS = 30;
+export const INITIAL_PASSWORD_MAX_FAILURES = 10;
+
+export function isValidTc(tc) {
+  if (!/^[1-9]\d{10}$/.test(tc)) return false;
+  const d = [...tc].map(Number);
+  const odd = d[0] + d[2] + d[4] + d[6] + d[8], even = d[1] + d[3] + d[5] + d[7];
+  if ((((odd * 7 - even) % 10) + 10) % 10 !== d[9]) return false;
+  return d.slice(0, 10).reduce((a, b) => a + b, 0) % 10 === d[10];
+}
+
+export function initialPassword(tc, phone) {
+  tc = String(tc ?? "").replace(/\s/g, "");
+  const digits = String(phone ?? "").replace(/\D/g, "").replace(/^(90|0)/, "");
+  if (!isValidTc(tc)) throw new Error("TC kimlik numarası geçersiz. 11 haneyi kontrol edin.");
+  if (!/^5\d{9}$/.test(digits)) throw new Error("Cep telefonu 5xx xxx xx xx biçiminde olmalı.");
+  return tc + digits.slice(-4);
 }

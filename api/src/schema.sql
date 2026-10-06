@@ -44,3 +44,7 @@ CREATE TABLE IF NOT EXISTS parcels (
 );
 
 CREATE INDEX IF NOT EXISTS parcels_lookup_idx ON parcels (mahalle_id, ada, parsel);
+
+-- İlk şifre (TC kimlik no + telefonun son 4 hanesi) için süre ve hatalı deneme kilidi.
+ALTER TABLE members ADD COLUMN IF NOT EXISTS failed_logins integer NOT NULL DEFAULT 0;
+ALTER TABLE members ADD COLUMN IF NOT EXISTS initial_password_expires_at timestamptz;

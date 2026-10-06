@@ -29,13 +29,18 @@ Tek seviyeli alt alan adı bilerek seçildi: Cloudflare'in ücretsiz sertifikas�
 
 ## Ortak Hesapları
 
-Ortaklar kendileri kayıt olmaz; hesabı kooperatif açar ve geçici şifreyi ortağa iletir. Ortak ilk girişte kendi şifresini belirler.
+Ortaklar kendileri kayıt olmaz; hesabı kooperatif açar. İlk giriş şifresi ortağın TC kimlik numarası + cep telefonunun
+son 4 hanesidir; komut bunları sorar ama kaydetmez, yalnızca şifrenin özeti saklanır. Ortağa yalnızca kullanıcı adını
+bildirmek yeterlidir; komutun yazdırdığı mesajda gizli bilgi yoktur.
+
+İlk şifre tahmin edilebilir bilgilerden oluştuğu için 30 gün geçerlidir ve 10 hatalı denemede hesap kilitlenir;
+iki durumda da `sifirla` ile yenilenir. Ortak ilk girişte kendi şifresini belirler, sonrasında bu kurallar kalkar.
 
 ```sh
-API="kubectl -n finike exec deploy/finike-api -- node src/cli.js"
+API="kubectl -n finike exec -it deploy/finike-api -- node src/cli.js"   # -it: TC ve telefonu sorabilmesi için
 
-$API ekle "Ahmet" "Yılmaz"    # yeni hesap: yilmazah (doluysa yilmazahm, yilmazahme...) + geçici şifre
-$API sifirla yilmazah          # şifresini unutan ortağa yeni geçici şifre
+$API ekle "Ahmet" "Yılmaz"    # yeni hesap: yilmazah (doluysa yilmazahm, yilmazahme...); TC ve telefonu sorar
+$API sifirla yilmazah          # şifresini unutan/kilitlenen ortak için ilk giriş şifresine döndür
 $API pasif yilmazah            # hesabı kapat (ortaklıktan ayrılma vb.)
 $API aktif yilmazah            # yeniden aç
 $API yonetici yilmazah evet    # yönetim sayfasına (/yonetim) erişim; "hayir" ile geri alınır
