@@ -5,7 +5,8 @@ services:
     environment:
       POSTGRES_DB: finike
       POSTGRES_USER: finike
-      POSTGRES_PASSWORD: yerel-gelistirme
+      # Yalnızca yerel deneme: veritabanı dışarıya port açmaz, şifre gerekmez.
+      POSTGRES_HOST_AUTH_METHOD: trust
     volumes: [db:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "finike"]
@@ -15,7 +16,7 @@ services:
     build: .
     ports: ["8787:8787"]
     environment:
-      DATABASE_URL: postgres://finike:yerel-gelistirme@db:5432/finike
+      DATABASE_URL: postgres://finike@db:5432/finike
       ALLOWED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
       COOKIE_SECURE: "false"
     depends_on:
