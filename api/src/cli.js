@@ -1,6 +1,6 @@
 // Ortak hesaplarını yönetme komutları. Sunucuda:
 //   kubectl -n finike exec deploy/finike-api -- node src/cli.js <komut> ...
-import { pool, migrate, normalizeMemberNo, usernameFor } from "./db.js";
+import { pool, migrate, normalizeMemberNo, usernameCandidates } from "./db.js";
 import { hashPassword, temporaryPassword } from "./auth.js";
 
 const USAGE = `Kullanım:
@@ -10,7 +10,8 @@ const USAGE = `Kullanım:
   node src/cli.js aktif <kullanıcı-adı>          Kapatılmış hesabı yeniden açar
   node src/cli.js liste                          Bütün ortak hesaplarını listeler
 
-Kullanıcı adı soyadı + adın ilk iki harfidir (Ahmet Yılmaz -> yilmazah). Aynısı varsa sonuna 2, 3... eklenir.`;
+Kullanıcı adı soyadı + adın ilk iki harfidir (Ahmet Yılmaz -> yilmazah). Doluysa adın ilk üç, dört...
+harfi kullanılır (yilmazahm, yilmazahme); ad biterse sonuna 2, 3... eklenir.`;
 
 function fail(msg) {
   console.error(msg);
@@ -33,11 +34,14 @@ Geçici şifre  : ${password}
   console.log("Geçici şifre bir daha gösterilmez. Mesajı ortağa iletin.");
 }
 
-async function freeUsername(base) {
-  const { rows } = await pool.query("SELECT member_no FROM members WHERE member_no LIKE $1 || '%'", [base]);
+async function freeUsername(firstName, lastName) {
+  const candidates = usernameCandidates(firstName, lastName);
+  const first = candidates.next().value;
+  if (!first) return null;
+  const { rows } = await pool.query("SELECT member_no FROM members WHERE member_no LIKE $1 || '%'", [first]);
   const taken = new Set(rows.map((r) => r.member_no));
-  if (!taken.has(base)) return base;
-  for (let i = 2; ; i++) if (!taken.has(base + i)) return base + i;
+  if (!taken.has(first)) return { username: first, base: first };
+  for (const c of candidates) if (!taken.has(c)) return { username: c, base: first };
 }
 
 async function run([cmd, ...args]) {
@@ -47,9 +51,9 @@ async function run([cmd, ...args]) {
   switch (cmd) {
     case "ekle": {
       const firstName = (args[0] || "").trim(), lastName = (args[1] || "").trim();
-      const base = usernameFor(firstName, lastName);
-      if (!firstName || !lastName || args.length > 2 || !base) return fail(USAGE);
-      const username = await freeUsername(base);
+      const free = args.length === 2 && (await freeUsername(firstName, lastName));
+      if (!free) return fail(USAGE);
+      const { username, base } = free;
       const fullName = `${firstName} ${lastName}`;
       const password = temporaryPassword();
       await pool.query("INSERT INTO members (member_no, full_name, password_hash) VALUES ($1, $2, $3)", [

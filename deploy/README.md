@@ -34,7 +34,7 @@ Ortaklar kendileri kayıt olmaz; hesabı kooperatif açar ve geçici şifreyi or
 ```sh
 API="kubectl -n finike exec deploy/finike-api -- node src/cli.js"
 
-$API ekle "Ahmet" "Yılmaz"    # yeni hesap: kullanıcı adı yilmazah + geçici şifre
+$API ekle "Ahmet" "Yılmaz"    # yeni hesap: yilmazah (doluysa yilmazahm, yilmazahme...) + geçici şifre
 $API sifirla yilmazah          # şifresini unutan ortağa yeni geçici şifre
 $API pasif yilmazah            # hesabı kapat (ortaklıktan ayrılma vb.)
 $API aktif yilmazah            # yeniden aç

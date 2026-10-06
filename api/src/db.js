@@ -21,7 +21,11 @@ export function normalizeMemberNo(value) {
     .replace(/[^a-z0-9]/g, "");
 }
 
-// Soyadı + adın ilk iki harfi: Ahmet Yılmaz -> yilmazah
-export function usernameFor(firstName, lastName) {
-  return normalizeMemberNo(lastName) + normalizeMemberNo(firstName).slice(0, 2);
+// Soyadı + adın ilk iki harfi; doluysa ilk üç, dört... harfi, ad biterse sonuna 2, 3...
+// Ahmet Yılmaz -> yilmazah, yilmazahm, yilmazahme, yilmazahmet, yilmazahmet2
+export function* usernameCandidates(firstName, lastName) {
+  const first = normalizeMemberNo(firstName), last = normalizeMemberNo(lastName);
+  if (!first || !last) return;
+  for (let n = Math.min(2, first.length); n <= first.length; n++) yield last + first.slice(0, n);
+  for (let i = 2; ; i++) yield last + first + i;
 }
