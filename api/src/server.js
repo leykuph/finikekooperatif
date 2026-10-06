@@ -301,6 +301,34 @@ async function allParcels(req, res) {
   send(res, 200, { members: [...members.values()] });
 }
 
+// Ortak listesi (yönetim > Ortaklar). Durum: aktif | ilk-giris | kilitli | suresi-doldu | kapali
+async function listMembers(req, res) {
+  await requireMember(req, { admin: true });
+  const { rows } = await pool.query(
+    `SELECT m.member_no, m.full_name, m.active, m.is_admin, m.created_at, m.last_login_at, c.full_name AS created_by,
+            CASE WHEN NOT m.active THEN 'kapali'
+                 WHEN NOT m.must_change_password THEN 'aktif'
+                 WHEN m.failed_logins >= $1 THEN 'kilitli'
+                 WHEN m.initial_password_expires_at < now() THEN 'suresi-doldu'
+                 ELSE 'ilk-giris' END AS status,
+            m.initial_password_expires_at,
+            COALESCE((SELECT json_agg(json_build_object('mahalle', p.mahalle_name, 'ada', p.ada, 'parsel', p.parsel,
+                        'nitelik', p.nitelik, 'mevkii', p.mevkii, 'areaM2', p.area_m2) ORDER BY p.mahalle_name, p.ada::int, p.parsel::int)
+                      FROM parcels p WHERE p.member_id = m.id), '[]') AS parcels
+       FROM members m LEFT JOIN members c ON c.id = m.created_by
+      ORDER BY m.full_name`,
+    [INITIAL_PASSWORD_MAX_FAILURES]
+  );
+  send(res, 200, {
+    members: rows.map((r) => ({
+      memberNo: r.member_no, fullName: r.full_name, status: r.status, isAdmin: r.is_admin,
+      createdAt: r.created_at, createdBy: r.created_by, lastLoginAt: r.last_login_at,
+      initialPasswordExpiresAt: r.status === "ilk-giris" ? r.initial_password_expires_at : null,
+      parcels: r.parcels.map((p) => ({ ...p, areaM2: p.areaM2 === null ? null : Number(p.areaM2) })),
+    })),
+  });
+}
+
 // Yönetim sayfasından ortak kaydı. TC ve telefon yalnızca ilk şifreyi üretmek için kullanılır; kaydedilmez, loglanmaz.
 async function addMember(req, res) {
   const admin = await requireMember(req, { admin: true });
@@ -335,6 +363,7 @@ const routes = {
   "GET /parcels": myParcels,
   "POST /parcels": addParcel,
   "GET /admin/parcels": allParcels,
+  "GET /admin/members": listMembers,
   "POST /admin/members": addMember,
   "GET /auth/me": me,
   "POST /auth/login": login,

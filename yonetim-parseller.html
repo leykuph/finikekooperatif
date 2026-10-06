@@ -6,15 +6,17 @@
 <link rel="icon" href="/icon.png" type="image/png" sizes="160x160">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<title>Ortaklar · Yönetim · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
-<meta name="description" content="S.S. Finike Tarımsal Kalkınma Kooperatifi yönetim paneli: ortaklar.">
+<title>Parseller · Yönetim · S.S. Finike Tarımsal Kalkınma Kooperatifi</title>
+<meta name="description" content="S.S. Finike Tarımsal Kalkınma Kooperatifi yönetim paneli: parseller.">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Quicksand:wght@400..700&family=Merienda:wght@400..800&display=swap">
 <link rel="stylesheet" href="css/main.css?v=23">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="css/uye.css?v=4">
 <script src="js/main.js?v=2" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 <script src="js/uye.js?v=4" defer></script>
 <script src="js/parsel.js?v=3" defer></script>
 <script src="js/yonetim.js" defer></script>
@@ -28,8 +30,8 @@
       <span class="brand-text"><strong>Finike Kooperatifi</strong><small>Yönetim Paneli</small></span>
     </a>
     <ul class="nav-links desktop">
-<li><a href="/yonetim" aria-current="page">Ortaklar</a></li>
-<li><a href="/yonetim-parseller">Parseller</a></li>
+<li><a href="/yonetim">Ortaklar</a></li>
+<li><a href="/yonetim-parseller" aria-current="page">Parseller</a></li>
 <li><a href="/ortak">Ortak Paneli</a></li>
 <li><a href="/">Siteye Dön</a></li>
 <li><a href="/giris" class="cikis-link">Çıkış</a></li>
@@ -38,8 +40,8 @@
       <summary aria-label="Menüyü aç">Menü</summary>
       <div class="menu-panel">
         <ul class="nav-links">
-<li><a href="/yonetim" aria-current="page">Ortaklar</a></li>
-<li><a href="/yonetim-parseller">Parseller</a></li>
+<li><a href="/yonetim">Ortaklar</a></li>
+<li><a href="/yonetim-parseller" aria-current="page">Parseller</a></li>
 <li><a href="/ortak">Ortak Paneli</a></li>
 <li><a href="/">Siteye Dön</a></li>
 <li><a href="/giris" class="cikis-link">Çıkış</a></li>
@@ -53,95 +55,36 @@
 <section class="section uye">
   <div class="wrap">
     <p class="muted" id="yukleniyor" role="status">Bilgiler yükleniyor…</p>
-    <div id="ortaklar-sayfa" hidden>
+    <div id="parseller-sayfa" hidden>
       <div class="panel-head">
         <div class="stack" style="gap:6px">
           <p class="eyebrow">Yönetim</p>
-          <h1>Ortaklar</h1>
-          <p class="muted" id="ozet-satir" role="status"></p>
+          <h1>Parseller</h1>
+          <p class="muted">Ortakların kendi bildirdiği parseller. Alan ve nitelik bilgileri TKGM'den alınmıştır.</p>
         </div>
         <div class="btn-row">
-          <button class="btn btn-ghost" type="button" id="csv-btn">Excel'e aktar</button>
-          <button class="btn btn-primary" type="button" id="yeni-btn">+ Yeni Ortak Kaydı</button>
+          <button class="btn btn-primary" type="button" id="csv-btn">Excel'e aktar</button>
         </div>
       </div>
-      <div class="toolbar">
-        <label class="sr-only" for="ara">Ortak ara</label>
-        <input class="input" id="ara" type="search" placeholder="Ad, soyad ya da kullanıcı adı ara" autocomplete="off">
-        <label class="sr-only" for="durum-filtre">Duruma göre süz</label>
-        <select class="select" id="durum-filtre">
-          <option value="">Bütün durumlar</option>
-          <option value="aktif">Aktif</option>
-          <option value="ilk-giris">İlk giriş bekliyor</option>
-          <option value="kilitli">Kilitli</option>
-          <option value="suresi-doldu">İlk şifre süresi doldu</option>
-          <option value="kapali">Kapalı</option>
-        </select>
+      <div class="kpis" id="ozet"></div>
+      <div class="map map-wide" id="harita" role="region" aria-label="Ortak parsellerinin uydu haritası"></div>
+      <div class="toolbar" style="margin-top:28px">
+        <label class="sr-only" for="ara">Parsel ara</label>
+        <input class="input" id="ara" type="search" placeholder="Ortak, mevkii, nitelik ya da ada/parsel ara" autocomplete="off">
+        <label class="sr-only" for="mahalle-filtre">Mahalleye göre süz</label>
+        <select class="select" id="mahalle-filtre"><option value="">Bütün mahalleler</option></select>
       </div>
+      <p class="muted small" id="filtre-ozet" role="status"></p>
       <div class="table-wrap">
-        <table class="veri-tablo ortak-liste">
-          <thead><tr><th scope="col">Ortak</th><th scope="col">Kullanıcı adı</th><th scope="col">Durum</th><th scope="col" class="num">Parsel</th><th scope="col" class="num">Toplam alan</th><th scope="col">Son giriş</th></tr></thead>
-          <tbody id="ortak-satirlar"></tbody>
+        <table class="veri-tablo parsel-liste">
+          <thead><tr><th scope="col">Ortak</th><th scope="col">Mahalle</th><th scope="col">Ada/Parsel</th><th scope="col">Nitelik</th><th scope="col">Mevkii</th><th scope="col" class="num">Alan</th></tr></thead>
+          <tbody id="parsel-satirlar"></tbody>
         </table>
       </div>
-      <p class="muted bos" id="bos" hidden>Aramanıza uyan ortak yok.</p>
+      <p class="muted bos" id="bos" hidden>Gösterilecek parsel yok.</p>
     </div>
   </div>
 </section>
-
-<dialog class="pencere" id="kayit-pencere" aria-labelledby="kayit-baslik">
-  <div class="pencere-head">
-    <h2 id="kayit-baslik">Yeni Ortak Kaydı</h2>
-    <button class="kapat" type="button" data-kapat aria-label="Kapat">×</button>
-  </div>
-  <form class="stack" id="kayit-form" novalidate autocomplete="off" style="gap:16px">
-    <div class="row-2">
-      <div class="field"><label for="k-ad">Ad</label><input class="input" id="k-ad" maxlength="60" required></div>
-      <div class="field"><label for="k-soyad">Soyad</label><input class="input" id="k-soyad" maxlength="60" required></div>
-    </div>
-    <div class="row-2">
-      <div class="field">
-        <label for="k-tc">TC kimlik no</label>
-        <input class="input num" id="k-tc" inputmode="numeric" autocomplete="off" required aria-describedby="k-tc-sayac">
-        <span class="hint" id="k-tc-sayac">0 / 11</span>
-      </div>
-      <div class="field">
-        <label for="k-tel">Cep telefonu</label>
-        <input class="input num" id="k-tel" type="tel" inputmode="numeric" placeholder="05xx xxx xx xx" autocomplete="off" required>
-      </div>
-    </div>
-    <p class="muted small">TC ve telefon kaydedilmez; yalnızca ortağın ilk giriş şifresini (TC + telefonun son 4 hanesi) oluşturmak için kullanılır. Kullanıcı adı otomatik verilir.</p>
-    <div class="notice" id="kayit-mesaj" role="status" tabindex="-1" hidden></div>
-    <div class="btn-row">
-      <button class="btn btn-primary" type="submit" id="kayit-btn">Ortağı kaydet</button>
-      <button class="btn btn-ghost" type="button" data-kapat>Vazgeç</button>
-    </div>
-  </form>
-  <div class="stack" id="kayit-sonuc" hidden tabindex="-1" style="gap:12px">
-    <div class="notice ok" id="kayit-tamam"></div>
-    <p class="muted small">Aşağıdaki mesajı ortağa gönderin. Mesajda gizli bilgi yoktur.</p>
-    <pre class="hos-geldin" id="kayit-metin"></pre>
-    <div class="btn-row">
-      <button class="btn btn-ghost btn-sm" type="button" id="kopyala-btn">Mesajı kopyala</button>
-      <a class="btn btn-ghost btn-sm" id="whatsapp-link" target="_blank" rel="noopener">WhatsApp ile gönder</a>
-      <a class="btn btn-ghost btn-sm" id="sms-link">SMS ile gönder</a>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary btn-sm" type="button" id="yeni-kayit-btn">Başka ortak kaydet</button>
-      <button class="btn btn-ghost btn-sm" type="button" data-kapat>Kapat</button>
-    </div>
-  </div>
-</dialog>
-
-<dialog class="pencere" id="ortak-pencere" aria-labelledby="ortak-baslik">
-  <div class="pencere-head">
-    <h2 id="ortak-baslik"></h2>
-    <button class="kapat" type="button" data-kapat aria-label="Kapat">×</button>
-  </div>
-  <dl class="bilgi-dl" id="ortak-bilgi"></dl>
-  <h3 class="pencere-alt">Parselleri</h3>
-  <div id="ortak-parseller"></div>
-</dialog>
 
 </main>
 <footer class="site-footer">
