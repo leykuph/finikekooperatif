@@ -12,6 +12,11 @@
   function dekar(m2){ return m2 == null ? "-" : (m2 / 1000).toLocaleString("tr-TR", {maximumFractionDigits: 1}) + " dekar"; }
   function m2(v){ return v == null ? "-" : v.toLocaleString("tr-TR", {maximumFractionDigits: 2}) + " m²"; }
   function label(p){ return p.mahalle + " " + p.ada + "/" + p.parsel; }
+  function num(v, frac){ return v.toLocaleString("tr-TR", {maximumFractionDigits: frac || 0}); }
+  function treeTotals(list){
+    return list.reduce(function(a, t){ return {count: a.count + t.count, tons: a.tons + t.tons}; }, {count: 0, tons: 0});
+  }
+  function treeText(t){ return num(t.count) + " " + t.species + " · " + t.ageYears + " yaş · ~" + num(t.tons, 2) + " ton"; }
   function show(box, text, cls){ box.className = "notice" + (cls ? " " + cls : ""); box.textContent = text; box.hidden = false; }
 
   function makeMap(id){
@@ -48,7 +53,10 @@
       function render(){
         layer.clearLayers(); list.textContent = "";
         var total = parcels.reduce(function(a, p){ return a + (p.areaM2 || 0); }, 0);
-        sum.textContent = parcels.length ? parcels.length + " parsel · toplam " + dekar(total) : "Henüz parsel eklemediniz. Sağdaki formdan ilk parselinizi ekleyin.";
+        var trees = treeTotals([].concat.apply([], parcels.map(function(p){ return p.trees; })));
+        sum.textContent = parcels.length ? parcels.length + " parsel · toplam " + dekar(total) +
+          (trees.count ? " · " + num(trees.count) + " ağaç · tahmini ~" + num(trees.tons, 2) + " ton" : "")
+          : "Henüz parsel eklemediniz. Sağdaki formdan ilk parselinizi ekleyin.";
         parcels.forEach(function(p){
           var shape = p.geometry ? L.geoJSON(p.geometry, {style: STYLE}).bindTooltip(label(p)).addTo(layer) : null;
           var go = el("button", {"class": "btn btn-ghost btn-sm", type: "button", text: "Haritada göster"});
@@ -62,10 +70,73 @@
               parcels = parcels.filter(function(x){ return x.id !== p.id; }); render();
             }).catch(function(){ alert(window.uyeNetErr); });
           });
-          list.appendChild(el("article", {"class": "card parsel-card"}, [details(p), el("div", {"class": "btn-row"}, [go, del])]));
+          list.appendChild(el("article", {"class": "card parsel-card"}, [details(p), treeSection(p), el("div", {"class": "btn-row"}, [go, del])]));
         });
         if (layer.getLayers().length) map.fitBounds(layer.getBounds(), {maxZoom: 17, padding: [20, 20]});
       }
+      // Parseldeki ağaç grupları: liste + "Ağaç ekle" ile açılan küçük form
+      function treeSection(p){
+        var ul = el("ul", {"class": "agac-liste"});
+        p.trees.forEach(function(t){
+          var x = el("button", {"class": "agac-sil", type: "button", "aria-label": treeText(t) + " kaydını sil", text: "×"});
+          x.addEventListener("click", function(){
+            if (!confirm(treeText(t) + " kaydı silinsin mi?")) return;
+            api("DELETE", "/trees/" + t.id).then(function(d){
+              if (!d.ok) { alert(d.error || window.uyeNetErr); return; }
+              p.trees = p.trees.filter(function(y){ return y.id !== t.id; }); render();
+            }).catch(function(){ alert(window.uyeNetErr); });
+          });
+          ul.appendChild(el("li", {}, [el("span", {text: treeText(t)}), x]));
+        });
+        var tot = treeTotals(p.trees);
+        var head = el("div", {"class": "agac-head"}, [
+          el("h4", {text: "Ağaçlar"}),
+          el("span", {"class": "muted small", text: p.trees.length ? num(tot.count) + " ağaç · ~" + num(tot.tons, 2) + " ton" : "Henüz ağaç eklenmedi"})
+        ]);
+
+        var uid = "agac-" + p.id;
+        function field(key, text, attrs){
+          var input = el("input", Object.assign({"class": "input", id: uid + "-" + key, required: ""}, attrs));
+          return el("div", {"class": "field"}, [el("label", {"for": input.id, text: text}), input]);
+        }
+        var msg = el("div", {"class": "notice", role: "status", hidden: ""});
+        var save = el("button", {"class": "btn btn-primary btn-sm", type: "submit", text: "Kaydet"});
+        var cancel = el("button", {"class": "btn btn-ghost btn-sm", type: "button", text: "Vazgeç"});
+        var form = el("form", {"class": "agac-form", novalidate: "", hidden: ""}, [
+          field("cins", "Ağaç cinsi", {list: "agac-cinsleri", maxlength: "40", autocomplete: "off", placeholder: "ör. Washington portakal"}),
+          el("div", {"class": "row-2"}, [
+            field("sayi", "Ağaç sayısı", {inputmode: "numeric", maxlength: "6"}),
+            field("yas", "Ağaç yaşı (yıl)", {inputmode: "numeric", maxlength: "3"})
+          ]),
+          field("ton", "Tahmini tonaj (ton/yıl)", {inputmode: "decimal", maxlength: "8", placeholder: "ör. 2,5"}),
+          msg,
+          el("div", {"class": "btn-row"}, [save, cancel])
+        ]);
+        var open = el("button", {"class": "btn btn-ghost btn-sm", type: "button", text: "+ Ağaç ekle"});
+        function toggle(on){ form.hidden = !on; open.hidden = on; msg.hidden = true; if (on) form.querySelector("input").focus(); else form.reset(); }
+        open.addEventListener("click", function(){ toggle(true); });
+        cancel.addEventListener("click", function(){ toggle(false); });
+
+        form.addEventListener("submit", function(e){
+          e.preventDefault();
+          function v(k){ return document.getElementById(uid + "-" + k).value.trim(); }
+          var body = {species: v("cins"), count: v("sayi"), ageYears: v("yas"), tons: v("ton").replace(",", ".")};
+          if (!body.species) { show(msg, "Ağaç cinsini yazın.", "bad"); return; }
+          if (!/^\d+$/.test(body.count) || Number(body.count) < 1) { show(msg, "Ağaç sayısını rakamla yazın.", "bad"); return; }
+          if (!/^\d+$/.test(body.ageYears)) { show(msg, "Ağaç yaşını yıl olarak rakamla yazın.", "bad"); return; }
+          if (!/^\d+(\.\d+)?$/.test(body.tons)) { show(msg, "Tahmini tonajı ton olarak yazın (ör. 2,5).", "bad"); return; }
+          body.count = Number(body.count); body.ageYears = Number(body.ageYears); body.tons = Number(body.tons);
+          save.disabled = true; save.textContent = "Kaydediliyor…";
+          api("POST", "/parcels/" + p.id + "/trees", body).then(function(d){
+            save.disabled = false; save.textContent = "Kaydet";
+            if (!d.tree) { show(msg, d.error || window.uyeNetErr, "bad"); return; }
+            p.trees.push(d.tree); render();
+          }).catch(function(){ save.disabled = false; save.textContent = "Kaydet"; show(msg, window.uyeNetErr, "bad"); });
+        });
+
+        return el("section", {"class": "agaclar"}, [head, p.trees.length ? ul : null, open, form]);
+      }
+
       api("GET", "/parcels").then(function(d){ parcels = d.parcels || []; render(); if (!d.parcels) show(msg, d.error || window.uyeNetErr, "bad"); })
         .catch(function(){ show(msg, window.uyeNetErr, "bad"); });
 
@@ -103,5 +174,6 @@
   }
 
   // Yönetim sayfaları (js/yonetim.js) aynı yardımcıları kullanır.
-  window.Parsel = {el: el, dekar: dekar, m2: m2, label: label, makeMap: makeMap, STYLE: STYLE, details: details, show: show};
+  window.Parsel = {el: el, dekar: dekar, m2: m2, label: label, makeMap: makeMap, STYLE: STYLE, details: details, show: show,
+    num: num, treeTotals: treeTotals, treeText: treeText};
 })();

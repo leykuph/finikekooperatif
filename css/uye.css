@@ -33,7 +33,7 @@
 .parsel-dl dd{margin:0;font-weight:600;font-size:var(--fs-sm)}
 .btn-sm{padding:7px 14px;font-size:var(--fs-sm)}
 .btn.danger{color:var(--error);border-color:var(--error)}
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
 @media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{display:grid;gap:2px;padding:16px 18px;border:1.5px dashed var(--line);border-radius:var(--radius-sm);background:var(--surface)}
 .kpi-value{font-family:var(--font-display);font-size:clamp(1.5rem,1.2rem + 1vw,2.1rem);color:var(--heading);font-variant-numeric:tabular-nums}
@@ -77,6 +77,19 @@
 @media (max-width:640px){
   /* Dar ekranda ayrıntı sütunları gizlenir; ortağın bilgileri satıra dokununca açılır */
   .ortak-liste th:nth-child(n+4),.ortak-liste td:nth-child(n+4){display:none}
-  .parsel-liste th:nth-child(4),.parsel-liste td:nth-child(4),.parsel-liste th:nth-child(5),.parsel-liste td:nth-child(5){display:none}
+  .parsel-liste th:nth-child(4),.parsel-liste td:nth-child(4),.parsel-liste th:nth-child(5),.parsel-liste td:nth-child(5),.parsel-liste th:nth-child(7),.parsel-liste td:nth-child(7){display:none}
   .toolbar .select{flex:1 1 100%}
 }
+
+/* ---------- Parseldeki ağaçlar ---------- */
+.agaclar{display:grid;gap:10px;padding-top:14px;border-top:1.5px dashed var(--line)}
+.agaclar > .btn{justify-self:start}
+.agac-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.agac-head h4{font-size:var(--fs-sm);margin:0}
+.agac-liste{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:var(--fs-sm)}
+.agac-liste li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--radius-sm);background:var(--bg)}
+.agac-sil{border:0;background:transparent;color:var(--muted);font-size:1.2rem;line-height:1;cursor:pointer;padding:2px 8px;border-radius:var(--radius-sm)}
+.agac-sil:hover{color:var(--error);background:var(--surface)}
+.agac-sil:focus-visible{outline:2px solid var(--leaf);outline-offset:1px}
+.agac-form{display:grid;gap:12px}
+.agac-mini{margin:2px 0 4px;padding-left:16px;color:var(--muted)}

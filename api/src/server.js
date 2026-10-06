@@ -20,6 +20,7 @@ const SESSION_DAYS = 30;
 const MAX_BODY = 10 * 1024;
 const TKGM_LOOKUPS_PER_HOUR = 60;
 const MAX_PARCELS_PER_MEMBER = 200;
+const MAX_TREE_GROUPS_PER_PARCEL = 50;
 
 // ---------- Deneme sınırı (bellek içi; tek kopya çalıştığı için yeterli) ----------
 const WINDOW_MS = 15 * 60 * 1000;
@@ -135,6 +136,20 @@ function parcelRow(r) {
     nitelik: r.nitelik, areaM2: r.area_m2 === null ? null : Number(r.area_m2), mevkii: r.mevkii, pafta: r.pafta,
     geometry: r.geometry, addedAt: r.created_at,
   };
+}
+
+function treeRow(r) {
+  return { id: Number(r.id), species: r.species, ageYears: r.age_years, count: r.tree_count, tons: Number(r.est_tons) };
+}
+
+function treeInput(o) {
+  const species = String(o.species ?? "").trim().replace(/\s+/g, " ");
+  const ageYears = Number(o.ageYears), count = Number(o.count), tons = Number(o.tons);
+  if (!species || species.length > 40) throw new HttpError(400, "Ağaç cinsini yazın (en fazla 40 karakter).");
+  if (!Number.isInteger(ageYears) || ageYears < 0 || ageYears > 150) throw new HttpError(400, "Ağaç yaşını yıl olarak yazın.");
+  if (!Number.isInteger(count) || count < 1 || count > 100000) throw new HttpError(400, "Ağaç sayısını yazın.");
+  if (!Number.isFinite(tons) || tons < 0 || tons > 100000) throw new HttpError(400, "Tahmini tonajı ton olarak yazın (ör. 2,5).");
+  return { species, ageYears, count, tons: Math.round(tons * 100) / 100 };
 }
 
 function parcelQuery(url) {
@@ -255,7 +270,14 @@ async function lookupParcel(req, res) {
 async function myParcels(req, res) {
   const member = await requireMember(req);
   const { rows } = await pool.query("SELECT * FROM parcels WHERE member_id = $1 ORDER BY mahalle_name, ada::int, parsel::int", [member.id]);
-  send(res, 200, { parcels: rows.map(parcelRow) });
+  const { rows: trees } = await pool.query(
+    "SELECT t.* FROM trees t JOIN parcels p ON p.id = t.parcel_id WHERE p.member_id = $1 ORDER BY t.id", [member.id]
+  );
+  send(res, 200, {
+    parcels: rows.map((r) => ({
+      ...parcelRow(r), trees: trees.filter((t) => t.parcel_id === r.id).map(treeRow),
+    })),
+  });
 }
 
 async function addParcel(req, res) {
@@ -273,13 +295,38 @@ async function addParcel(req, res) {
     [member.id, mahalleId, p.mahalle, ada, parsel, p.nitelik, p.areaM2, p.mevkii, p.pafta, JSON.stringify(p.geometry)]
   );
   if (!rows[0]) throw new HttpError(409, "Bu parsel zaten listenizde.");
-  send(res, 201, { parcel: parcelRow(rows[0]) });
+  send(res, 201, { parcel: { ...parcelRow(rows[0]), trees: [] } });
 }
 
 async function removeParcel(req, res, id) {
   const member = await requireMember(req);
   const { rowCount } = await pool.query("DELETE FROM parcels WHERE id = $1 AND member_id = $2", [id, member.id]);
   if (!rowCount) throw new HttpError(404, "Parsel bulunamadı.");
+  send(res, 200, { ok: true });
+}
+
+async function addTrees(req, res, parcelId) {
+  const member = await requireMember(req);
+  const t = treeInput(await readJson(req));
+  const { rows: [p] } = await pool.query(
+    `SELECT (SELECT count(*)::int FROM trees WHERE parcel_id = p.id) AS groups FROM parcels p WHERE p.id = $1 AND p.member_id = $2`,
+    [parcelId, member.id]
+  );
+  if (!p) throw new HttpError(404, "Parsel bulunamadı.");
+  if (p.groups >= MAX_TREE_GROUPS_PER_PARCEL) throw new HttpError(400, `Bir parsele en fazla ${MAX_TREE_GROUPS_PER_PARCEL} ağaç grubu eklenebilir.`);
+  const { rows } = await pool.query(
+    `INSERT INTO trees (parcel_id, species, age_years, tree_count, est_tons) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [parcelId, t.species, t.ageYears, t.count, t.tons]
+  );
+  send(res, 201, { tree: treeRow(rows[0]) });
+}
+
+async function removeTrees(req, res, id) {
+  const member = await requireMember(req);
+  const { rowCount } = await pool.query(
+    "DELETE FROM trees t USING parcels p WHERE t.id = $1 AND p.id = t.parcel_id AND p.member_id = $2", [id, member.id]
+  );
+  if (!rowCount) throw new HttpError(404, "Kayıt bulunamadı.");
   send(res, 200, { ok: true });
 }
 
@@ -291,12 +338,15 @@ async function allParcels(req, res) {
        FROM members m LEFT JOIN parcels p ON p.member_id = m.id
       ORDER BY m.full_name, p.mahalle_name, p.ada::int, p.parsel::int`
   );
+  const { rows: trees } = await pool.query("SELECT * FROM trees ORDER BY id");
   const members = new Map();
   for (const r of rows) {
     if (!members.has(r.member_no)) members.set(r.member_no, {
       memberNo: r.member_no, fullName: r.full_name, active: r.active, pendingFirstLogin: r.must_change_password, parcels: [],
     });
-    if (r.id !== null) members.get(r.member_no).parcels.push({ ...parcelRow(r), shared: Number(r.owners) > 1 });
+    if (r.id !== null) members.get(r.member_no).parcels.push({
+      ...parcelRow(r), shared: Number(r.owners) > 1, trees: trees.filter((t) => t.parcel_id === r.id).map(treeRow),
+    });
   }
   send(res, 200, { members: [...members.values()] });
 }
@@ -313,7 +363,10 @@ async function listMembers(req, res) {
                  ELSE 'ilk-giris' END AS status,
             m.initial_password_expires_at,
             COALESCE((SELECT json_agg(json_build_object('mahalle', p.mahalle_name, 'ada', p.ada, 'parsel', p.parsel,
-                        'nitelik', p.nitelik, 'mevkii', p.mevkii, 'areaM2', p.area_m2) ORDER BY p.mahalle_name, p.ada::int, p.parsel::int)
+                        'nitelik', p.nitelik, 'mevkii', p.mevkii, 'areaM2', p.area_m2,
+                        'trees', COALESCE((SELECT json_agg(json_build_object('id', t.id, 'species', t.species, 'ageYears', t.age_years,
+                                    'count', t.tree_count, 'tons', t.est_tons) ORDER BY t.id) FROM trees t WHERE t.parcel_id = p.id), '[]'))
+                        ORDER BY p.mahalle_name, p.ada::int, p.parsel::int)
                       FROM parcels p WHERE p.member_id = m.id), '[]') AS parcels
        FROM members m LEFT JOIN members c ON c.id = m.created_by
       ORDER BY m.full_name`,
@@ -324,7 +377,9 @@ async function listMembers(req, res) {
       memberNo: r.member_no, fullName: r.full_name, status: r.status, isAdmin: r.is_admin,
       createdAt: r.created_at, createdBy: r.created_by, lastLoginAt: r.last_login_at,
       initialPasswordExpiresAt: r.status === "ilk-giris" ? r.initial_password_expires_at : null,
-      parcels: r.parcels.map((p) => ({ ...p, areaM2: p.areaM2 === null ? null : Number(p.areaM2) })),
+      parcels: r.parcels.map((p) => ({
+        ...p, areaM2: p.areaM2 === null ? null : Number(p.areaM2), trees: p.trees.map((t) => ({ ...t, tons: Number(t.tons) })),
+      })),
     })),
   });
 }
@@ -420,9 +475,11 @@ const server = http.createServer(async (req, res) => {
   // Durum değiştiren istekler yalnızca sitemizden gelebilir (CSRF koruması).
   if (req.method !== "GET" && !allowed) return send(res, 403, { error: "İzin verilmeyen kaynak." });
 
-  const del = req.method === "DELETE" && path.match(/^\/parcels\/(\d+)$/);
+  const del = req.method === "DELETE" && path.match(/^\/(parcels|trees)\/(\d+)$/);
+  const addT = req.method === "POST" && path.match(/^\/parcels\/(\d+)\/trees$/);
   const act = req.method === "POST" && path.match(/^\/admin\/members\/([a-z0-9]+)\/(reset|active)$/);
-  const handler = del ? (rq, rs) => removeParcel(rq, rs, Number(del[1]))
+  const handler = del ? (rq, rs) => (del[1] === "parcels" ? removeParcel : removeTrees)(rq, rs, Number(del[2]))
+    : addT ? (rq, rs) => addTrees(rq, rs, Number(addT[1]))
     : act ? (rq, rs) => (act[2] === "reset" ? resetMemberPassword : setActive)(rq, rs, act[1])
     : routes[`${req.method} ${path}`];
   if (!handler) return send(res, 404, { error: "Bulunamadı." });

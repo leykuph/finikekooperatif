@@ -51,3 +51,16 @@ ALTER TABLE members ADD COLUMN IF NOT EXISTS initial_password_expires_at timesta
 
 -- Hesabı yönetim sayfasından açan yönetici (komut satırından açılanlarda boş).
 ALTER TABLE members ADD COLUMN IF NOT EXISTS created_by bigint REFERENCES members(id) ON DELETE SET NULL;
+
+-- Parseldeki ağaçlar: aynı cins ve yaştaki ağaçlar bir grup olarak girilir.
+CREATE TABLE IF NOT EXISTS trees (
+  id          bigserial PRIMARY KEY,
+  parcel_id   bigint NOT NULL REFERENCES parcels(id) ON DELETE CASCADE,
+  species     text NOT NULL,
+  age_years   smallint NOT NULL,
+  tree_count  integer NOT NULL,
+  est_tons    numeric(10, 2) NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS trees_parcel_id_idx ON trees (parcel_id);

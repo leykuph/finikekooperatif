@@ -16,6 +16,10 @@
   function fold(s){ return String(s || "").toLocaleLowerCase("tr-TR"); }
   function pill(status){ return el("span", {"class": "durum durum-" + status, text: STATUS[status] || status}); }
   function totalArea(parcels){ return parcels.reduce(function(a, p){ return a + (p.areaM2 || 0); }, 0); }
+  function allTrees(parcels){ return P.treeTotals([].concat.apply([], parcels.map(function(p){ return p.trees; }))); }
+  function treesShort(t){ return t.count ? P.num(t.count) + " ağaç · ~" + P.num(t.tons, 2) + " ton" : "-"; }
+  function tonsCell(t){ return String(Math.round(t * 100) / 100).replace(".", ","); }
+  function treesCell(list){ return list.map(function(t){ return t.count + " " + t.species + " (" + t.ageYears + " yaş, " + tonsCell(t.tons) + " ton)"; }).join("; "); }
 
   // Excel Türkçe ayarlarda ";" ayırıcı ve UTF-8 BOM ile doğrudan açar.
   function downloadCsv(name, rows){
@@ -113,6 +117,7 @@
           el("td", {text: m.memberNo}), el("td", {}, [pill(m.status)]),
           el("td", {"class": "num", text: String(m.parcels.length)}),
           el("td", {"class": "num", text: m.parcels.length ? dekar(totalArea(m.parcels)) : "-"}),
+          el("td", {"class": "num", text: treesShort(allTrees(m.parcels))}),
           el("td", {text: date(m.lastLoginAt, true)})
         ]);
         tr.addEventListener("click", function(e){ if (e.target !== open) openMember(m); });
@@ -146,9 +151,13 @@
       var box = document.getElementById("ortak-parseller"); box.textContent = "";
       if (!m.parcels.length) box.appendChild(el("p", {"class": "muted small", text: "Henüz parsel bildirmedi."}));
       else {
-        box.appendChild(el("p", {"class": "muted small", text: m.parcels.length + " parsel · toplam " + dekar(totalArea(m.parcels))}));
+        var tt = allTrees(m.parcels);
+        box.appendChild(el("p", {"class": "muted small", text: m.parcels.length + " parsel · toplam " + dekar(totalArea(m.parcels)) + (tt.count ? " · " + treesShort(tt) : "")}));
         var ul = el("ul", {"class": "parsel-mini"});
-        m.parcels.forEach(function(p){ ul.appendChild(el("li", {text: label(p) + " · " + (p.nitelik || "-") + " · " + (p.mevkii || "-") + " · " + dekar(p.areaM2)})); });
+        m.parcels.forEach(function(p){
+          var trees = p.trees.length ? el("ul", {"class": "agac-mini"}, p.trees.map(function(t){ return el("li", {text: P.treeText(t)}); })) : null;
+          ul.appendChild(el("li", {}, [el("span", {text: label(p) + " · " + (p.nitelik || "-") + " · " + (p.mevkii || "-") + " · " + dekar(p.areaM2)}), trees]));
+        });
         box.appendChild(ul);
       }
       var closed = m.status === "kapali";
@@ -194,10 +203,11 @@
     });
 
     document.getElementById("csv-btn").addEventListener("click", function(){
-      var rows = [["Ad Soyad", "Kullanıcı adı", "Durum", "Yönetici", "Parsel sayısı", "Toplam alan (m²)", "Kayıt tarihi", "Son giriş"]];
+      var rows = [["Ad Soyad", "Kullanıcı adı", "Durum", "Yönetici", "Parsel sayısı", "Toplam alan (m²)", "Ağaç sayısı", "Tahmini tonaj (ton)", "Kayıt tarihi", "Son giriş"]];
       members.forEach(function(m){
+        var tt = allTrees(m.parcels);
         rows.push([m.fullName, m.memberNo, STATUS[m.status], m.isAdmin ? "evet" : "", m.parcels.length,
-          areaCell(totalArea(m.parcels)), date(m.createdAt), m.lastLoginAt ? date(m.lastLoginAt, true) : ""]);
+          areaCell(totalArea(m.parcels)), tt.count, tonsCell(tt.tons), date(m.createdAt), m.lastLoginAt ? date(m.lastLoginAt, true) : ""]);
       });
       downloadCsv("ortaklar", rows);
     });
@@ -261,8 +271,11 @@
       all.forEach(function(x){ unique[x.p.mahalleId + "/" + x.p.ada + "/" + x.p.parsel] = x.p.areaM2 || 0; });
       var keys = Object.keys(unique), total = keys.reduce(function(a, k){ return a + unique[k]; }, 0);
       var withParcels = memberList.filter(function(m){ return m.parcels.length; }).length;
+      // Ağaçlar ortak başına girildiği için hisseli parsellerde her ortağın beyanı ayrı sayılır.
+      var tt = allTrees(all.map(function(x){ return x.p; }));
       var box = document.getElementById("ozet");
-      [["Ortak", memberList.length], ["Parsel bildiren", withParcels], ["Parsel", keys.length], ["Toplam alan", dekar(total)]].forEach(function(k){
+      [["Ortak", memberList.length], ["Parsel bildiren", withParcels], ["Parsel", keys.length], ["Toplam alan", dekar(total)],
+       ["Ağaç", P.num(tt.count)], ["Tahmini tonaj", "~" + P.num(tt.tons, 1) + " ton"]].forEach(function(k){
         box.appendChild(el("div", {"class": "kpi"}, [el("span", {"class": "kpi-value", text: String(k[1])}), el("span", {"class": "kpi-label", text: k[0]})]));
       });
     }
@@ -272,7 +285,7 @@
       return all.filter(function(x){
         if (mh && x.p.mahalle !== mh) return false;
         if (!q) return true;
-        return [x.m.fullName, x.m.memberNo, x.p.mevkii, x.p.nitelik, x.p.ada + "/" + x.p.parsel].some(function(s){ return fold(s).indexOf(q) >= 0; });
+        return [x.m.fullName, x.m.memberNo, x.p.mevkii, x.p.nitelik, x.p.ada + "/" + x.p.parsel].concat(x.p.trees.map(function(t){ return t.species; })).some(function(s){ return fold(s).indexOf(q) >= 0; });
       });
     }
 
@@ -288,7 +301,8 @@
           el("td", {text: x.p.mahalle}),
           el("td", {}, [el("span", {text: x.p.ada + "/" + x.p.parsel}), x.p.shared ? el("span", {"class": "etiket", title: "Bu parseli birden fazla ortak bildirdi (hisseli olabilir).", text: "birden fazla ortakta"}) : null]),
           el("td", {text: x.p.nitelik || "-"}), el("td", {text: x.p.mevkii || "-"}),
-          el("td", {"class": "num", text: dekar(x.p.areaM2)})
+          el("td", {"class": "num", text: dekar(x.p.areaM2)}),
+          el("td", {"class": "num", title: x.p.trees.map(P.treeText).join("\n"), text: treesShort(P.treeTotals(x.p.trees))})
         ]);
         var focus = function(){
           if (!shape) return;
@@ -312,9 +326,11 @@
     mahalleSel.addEventListener("change", function(){ render(true); });
 
     document.getElementById("csv-btn").addEventListener("click", function(){
-      var rows = [["Ortak", "Kullanıcı adı", "Mahalle", "Ada", "Parsel", "Nitelik", "Mevkii", "Alan (m²)", "Pafta", "Birden fazla ortakta"]];
+      var rows = [["Ortak", "Kullanıcı adı", "Mahalle", "Ada", "Parsel", "Nitelik", "Mevkii", "Alan (m²)", "Pafta", "Birden fazla ortakta", "Ağaç sayısı", "Tahmini tonaj (ton)", "Ağaçlar"]];
       visible().forEach(function(x){
-        rows.push([x.m.fullName, x.m.memberNo, x.p.mahalle, x.p.ada, x.p.parsel, x.p.nitelik, x.p.mevkii, areaCell(x.p.areaM2), x.p.pafta, x.p.shared ? "evet" : ""]);
+        var tt = P.treeTotals(x.p.trees);
+        rows.push([x.m.fullName, x.m.memberNo, x.p.mahalle, x.p.ada, x.p.parsel, x.p.nitelik, x.p.mevkii, areaCell(x.p.areaM2), x.p.pafta, x.p.shared ? "evet" : "",
+          tt.count, tonsCell(tt.tons), treesCell(x.p.trees)]);
       });
       downloadCsv("ortak-parselleri", rows);
     });
