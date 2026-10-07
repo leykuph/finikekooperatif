@@ -94,10 +94,12 @@
         });
         if (layer.getLayers().length) map.fitBounds(layer.getBounds(), {maxZoom: 17, padding: [20, 20]});
       }
-      // Parseldeki ağaç grupları: liste + "Ağaç ekle" ile açılan küçük form
+      // Parseldeki ağaç grupları: liste + "Ağaç ekle" / "Düzenle" ile açılan küçük form
       function treeSection(p){
-        var ul = el("ul", {"class": "agac-liste"});
+        var ul = el("ul", {"class": "agac-liste"}), editing = null;
         p.trees.forEach(function(t){
+          var ed = el("button", {"class": "agac-duzenle", type: "button", "aria-label": treeText(t) + " kaydını düzenle", title: "Düzenle", text: "✎"});
+          ed.addEventListener("click", function(){ toggle(true, t); });
           var x = el("button", {"class": "agac-sil", type: "button", "aria-label": treeText(t) + " kaydını sil", text: "×"});
           x.addEventListener("click", function(){
             if (!confirm(treeText(t) + " kaydı silinsin mi?")) return;
@@ -106,7 +108,7 @@
               p.trees = p.trees.filter(function(y){ return y.id !== t.id; }); render();
             }).catch(function(){ alert(window.uyeNetErr); });
           });
-          ul.appendChild(el("li", {}, [el("span", {text: treeText(t)}), x]));
+          ul.appendChild(el("li", {}, [el("span", {text: treeText(t)}), el("span", {"class": "agac-islem"}, [ed, x])]));
         });
         var tot = treeTotals(p.trees);
         var head = el("div", {"class": "agac-head"}, [
@@ -133,13 +135,23 @@
           el("div", {"class": "btn-row"}, [save, cancel])
         ]);
         var open = el("button", {"class": "agac-ekle", type: "button", text: "+ Ağaç ekle (cins, sayı, yaş, tonaj)"});
-        function toggle(on){ form.hidden = !on; open.hidden = on; msg.hidden = true; if (on) form.querySelector("input").focus(); else form.reset(); }
+        function input(k){ return document.getElementById(uid + "-" + k); }
+        // t verilirse form o kaydı düzenler (alanlar dolu gelir), verilmezse yeni kayıt ekler.
+        function toggle(on, t){
+          editing = on && t ? t : null;
+          form.reset(); form.hidden = !on; open.hidden = on; msg.hidden = true;
+          if (editing) {
+            input("cins").value = t.species; input("sayi").value = String(t.count); input("yas").value = String(t.ageYears);
+            input("ton").value = String(t.tons).replace(".", ",");
+          }
+          if (on) input("cins").focus();
+        }
         open.addEventListener("click", function(){ toggle(true); });
         cancel.addEventListener("click", function(){ toggle(false); });
 
         form.addEventListener("submit", function(e){
           e.preventDefault();
-          function v(k){ return document.getElementById(uid + "-" + k).value.trim(); }
+          function v(k){ return input(k).value.trim(); }
           var body = {species: v("cins"), count: v("sayi"), ageYears: v("yas"), tons: v("ton").replace(",", ".")};
           if (!body.species) { show(msg, "Ağaç cinsini yazın.", "bad"); return; }
           if (!/^\d+$/.test(body.count) || Number(body.count) < 1) { show(msg, "Ağaç sayısını rakamla yazın.", "bad"); return; }
@@ -147,10 +159,12 @@
           if (!/^\d+(\.\d+)?$/.test(body.tons)) { show(msg, "Tahmini tonajı ton olarak yazın (ör. 2,5).", "bad"); return; }
           body.count = Number(body.count); body.ageYears = Number(body.ageYears); body.tons = Number(body.tons);
           save.disabled = true; save.textContent = "Kaydediliyor…";
-          api("POST", "/parcels/" + p.id + "/trees", body).then(function(d){
+          var t = editing;
+          api(t ? "PUT" : "POST", t ? "/trees/" + t.id : "/parcels/" + p.id + "/trees", body).then(function(d){
             save.disabled = false; save.textContent = "Kaydet";
             if (!d.tree) { show(msg, d.error || window.uyeNetErr, "bad"); return; }
-            p.trees.push(d.tree); render();
+            if (t) p.trees = p.trees.map(function(y){ return y.id === t.id ? d.tree : y; }); else p.trees.push(d.tree);
+            render();
           }).catch(function(){ save.disabled = false; save.textContent = "Kaydet"; show(msg, window.uyeNetErr, "bad"); });
         });
 

@@ -89,9 +89,11 @@
 .agac-head h4{font-size:var(--fs-sm);margin:0}
 .agac-liste{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:var(--fs-sm)}
 .agac-liste li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;border-radius:var(--radius-sm);background:var(--bg)}
-.agac-sil{border:0;background:transparent;color:var(--muted);font-size:1.2rem;line-height:1;cursor:pointer;padding:2px 8px;border-radius:var(--radius-sm)}
+.agac-islem{display:flex;flex-shrink:0}
+.agac-duzenle,.agac-sil{border:0;background:transparent;color:var(--muted);font-size:1.2rem;line-height:1;cursor:pointer;padding:2px 8px;border-radius:var(--radius-sm)}
+.agac-duzenle:hover{color:var(--leaf);background:var(--surface)}
 .agac-sil:hover{color:var(--error);background:var(--surface)}
-.agac-sil:focus-visible{outline:2px solid var(--leaf);outline-offset:1px}
+.agac-duzenle:focus-visible,.agac-sil:focus-visible{outline:2px solid var(--leaf);outline-offset:1px}
 .agac-form{display:grid;gap:12px}
 .agac-mini{margin:2px 0 4px;padding-left:16px;color:var(--muted)}
 

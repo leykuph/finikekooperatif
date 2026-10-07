@@ -345,6 +345,18 @@ async function addTrees(req, res, parcelId) {
   send(res, 201, { tree: treeRow(rows[0]) });
 }
 
+async function updateTrees(req, res, id) {
+  const member = await requireMember(req);
+  const t = treeInput(await readJson(req));
+  const { rows } = await pool.query(
+    `UPDATE trees t SET species = $3, age_years = $4, tree_count = $5, est_tons = $6
+     FROM parcels p WHERE t.id = $1 AND p.id = t.parcel_id AND p.member_id = $2 RETURNING t.*`,
+    [id, member.id, t.species, t.ageYears, t.count, t.tons]
+  );
+  if (!rows.length) throw new HttpError(404, "Kayıt bulunamadı.");
+  send(res, 200, { tree: treeRow(rows[0]) });
+}
+
 async function removeTrees(req, res, id) {
   const member = await requireMember(req);
   const { rowCount } = await pool.query(
@@ -592,7 +604,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     if (!allowed) return send(res, 403);
     return send(res, 204, undefined, {
-      "Access-Control-Allow-Methods": "GET, POST, DELETE",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Max-Age": "600",
     });
@@ -602,11 +614,13 @@ const server = http.createServer(async (req, res) => {
 
   const del = req.method === "DELETE" && path.match(/^\/(parcels|trees)\/(\d+)$/);
   const addT = req.method === "POST" && path.match(/^\/parcels\/(\d+)\/trees$/);
+  const putT = req.method === "PUT" && path.match(/^\/trees\/(\d+)$/);
   const act = req.method === "POST" && path.match(/^\/admin\/members\/([a-z0-9]+)\/(reset|active)$/);
   const msg = path.match(/^\/admin\/messages\/(\d+)(\/read)?$/);
   const msgHandler = msg && (req.method === "POST" && msg[2] ? markMessage : req.method === "DELETE" && !msg[2] ? deleteMessage : null);
   const handler = del ? (rq, rs) => (del[1] === "parcels" ? removeParcel : removeTrees)(rq, rs, Number(del[2]))
     : addT ? (rq, rs) => addTrees(rq, rs, Number(addT[1]))
+    : putT ? (rq, rs) => updateTrees(rq, rs, Number(putT[1]))
     : msgHandler ? (rq, rs) => msgHandler(rq, rs, Number(msg[1]))
     : act ? (rq, rs) => (act[2] === "reset" ? resetMemberPassword : setActive)(rq, rs, act[1])
     : routes[`${req.method} ${path}`];
