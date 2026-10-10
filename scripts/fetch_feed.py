@@ -137,12 +137,13 @@ def main():
         for p in json.loads(OUT.read_text()):
             old.setdefault(p["platform"], []).append(p)
 
-    posts, failed = [], False
+    posts, tried, failed = [], 0, 0
     for name, fn, args in sources:
         key = fn.__name__
         if not all(args):
             print(f"{name}: atlandı (anahtar yok)")
             continue
+        tried += 1
         try:
             got = fn(*args)
             print(f"{name}: {len(got)} gönderi")
@@ -150,12 +151,13 @@ def main():
         except Exception as e:  # bir platform düşerse eski gönderileri koru
             print(f"{name}: HATA {e}", file=sys.stderr)
             posts += old.get(key, [])
-            failed = True
+            failed += 1
 
     posts.sort(key=lambda p: p["tarih"], reverse=True)
     OUT.write_text(json.dumps(posts, ensure_ascii=False, indent=1) + "\n")
     print(f"feed.json: {len(posts)} gönderi")
-    return 1 if failed and not posts else 0
+    # X, GitHub sunucularına sık sık 429 döner; tek platformun düşmesi işi kırmızıya çevirmesin.
+    return 1 if tried and failed == tried else 0
 
 
 if __name__ == "__main__":

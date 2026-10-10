@@ -178,6 +178,9 @@ a:hover{text-decoration-thickness:2px}
 .site-footer .brand{color:#fff!important}
 .site-footer ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:var(--fs-sm)}
 .footer-bottom{border-top:1px dashed rgba(216,227,217,.25);margin-top:56px;padding-top:20px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:var(--fs-xs);color:var(--footer-muted)}
+.site-footer .footer-social{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.footer-social a{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;border:1px solid rgba(216,227,217,.25);color:var(--footer-ink);transition:color .15s,border-color .15s}
+.footer-social a:hover,.footer-social a:focus-visible{color:var(--footer-accent);border-color:var(--footer-accent)}
 .footer-adres{font-style:normal;font-size:.9375rem;line-height:1.6;margin-bottom:12px}
 
 /* ---------- Form (default + hata durumu) ---------- */
