@@ -58,9 +58,16 @@ def instagram(token):
 
 
 def facebook(page_id, token):
-    who = json.loads(get(f"https://graph.facebook.com/v21.0/{page_id}?fields=id,name,link&access_token={token}"))
-    print(f"Facebook hesabı: {who.get('name')} · {who.get('link')} · {who.get('id')}")
-    q = urllib.parse.urlencode({
+    # Sayfayı yöneten kişisel hesabın jetonu verildiyse sayfanın jetonu /me/accounts'tan alınır.
+    try:
+        pages = json.loads(get(f"https://graph.facebook.com/v21.0/me/accounts?fields=id,name,link,access_token&access_token={token}"))["data"]
+    except RuntimeError:  # zaten sayfa jetonu
+        pages = []
+    if pages:
+        page = next((p for p in pages if p["id"] == page_id), pages[0])
+        page_id, token = page["id"], page["access_token"]
+        print(f"Facebook sayfası: {page['name']} · {page.get('link')} · {page_id}")
+    q =urllib.parse.urlencode({
         "fields": "message,created_time,permalink_url,full_picture",
         "limit": LIMIT, "access_token": token,
     })
