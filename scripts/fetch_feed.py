@@ -63,6 +63,10 @@ def facebook(page_id, token):
         pages = json.loads(get(f"https://graph.facebook.com/v21.0/me/accounts?fields=id,name,link,access_token&access_token={token}"))["data"]
     except RuntimeError:  # zaten sayfa jetonu
         pages = []
+    else:
+        if not pages:  # sayfa izni verilmemiş: hangi izinlerin olduğunu göster
+            perms = json.loads(get(f"https://graph.facebook.com/v21.0/me/permissions?access_token={token}"))["data"]
+            print("Facebook: jetonun yönettiği sayfa yok. İzinler:", ", ".join(f"{x['permission']}={x['status']}" for x in perms))
     if pages:
         page = next((p for p in pages if p["id"] == page_id), pages[0])
         page_id, token = page["id"], page["access_token"]
