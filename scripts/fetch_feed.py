@@ -13,6 +13,7 @@ Yalnızca standart kütüphane kullanır. Anahtarlar ortam değişkenlerinden ok
 import json
 import os
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -23,8 +24,11 @@ OUT = Path(__file__).resolve().parent.parent / "feed.json"
 
 def get(url, headers=None):
     req = urllib.request.Request(url, headers={"User-Agent": "finike-feed/1.0", **(headers or {})})
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return r.read()
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            return r.read()
+    except urllib.error.HTTPError as e:  # Graph API hatanın nedenini gövdede döner
+        raise RuntimeError(f"HTTP {e.code}: {e.read().decode(errors='replace')[:500]}") from None
 
 
 def short(text, n=280):
