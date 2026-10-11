@@ -10,6 +10,7 @@ Yalnızca standart kütüphane kullanır. Anahtarlar ortam değişkenlerinden ok
 
 Çalıştırma:  python3 scripts/fetch_feed.py  ->  feed.json
 """
+import hashlib
 import json
 import os
 import sys
@@ -19,7 +20,9 @@ import urllib.request
 from pathlib import Path
 
 LIMIT = 12  # platform başına en fazla gönderi
-OUT = Path(__file__).resolve().parent.parent / "feed.json"
+ROOT = Path(__file__).resolve().parent.parent
+OUT = ROOT / "feed.json"
+IMG_DIR = ROOT / "images" / "sosyal"  # görseller siteye indirilir: platform adresleri süreli ve tarayıcılarca engellenebilir
 
 
 def get(url, headers=None):
@@ -91,6 +94,28 @@ def facebook(page_id, token):
     } for p in data if p.get("message") or p.get("full_picture")]
 
 
+def save_images(posts):
+    IMG_DIR.mkdir(parents=True, exist_ok=True)
+    keep = set()
+    for p in posts:
+        src = p.get("gorsel", "")
+        if not src:
+            continue
+        name = hashlib.sha1(p["link"].encode()).hexdigest()[:16] + ".jpg"
+        path = IMG_DIR / name
+        if not path.exists() and src.startswith("http"):
+            try:
+                path.write_bytes(get(src))
+            except Exception as e:
+                print(f"görsel indirilemedi ({p['link']}): {e}", file=sys.stderr)
+        if path.exists():
+            p["gorsel"] = f"/images/sosyal/{name}"
+            keep.add(name)
+    for f in IMG_DIR.glob("*.jpg"):  # akıştan düşen gönderilerin görsellerini sil
+        if f.name not in keep:
+            f.unlink()
+
+
 def main():
     env = os.environ.get
     sources = [
@@ -117,6 +142,7 @@ def main():
             posts += old.get(key, [])
             failed = True
 
+    save_images(posts)
     posts.sort(key=lambda p: p["tarih"], reverse=True)
     OUT.write_text(json.dumps(posts, ensure_ascii=False, indent=1) + "\n")
     print(f"feed.json: {len(posts)} gönderi")

@@ -22,8 +22,9 @@ jobs:
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
       - name: Değiştiyse commit et
         run: |
-          git diff --quiet feed.json && exit 0
+          git add -A feed.json images/sosyal
+          git diff --cached --quiet && exit 0
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-          git commit -am "Sosyal medya akışını güncelle"
+          git commit -m "Sosyal medya akışını güncelle"
           git push

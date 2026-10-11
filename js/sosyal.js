@@ -13,7 +13,7 @@ var FEED_URL = "feed.json";
     if(!list.length){feed.innerHTML='<p class="muted">'+(current==="hepsi"?"Henüz gönderi yok. Yukarıdaki hesaplardan bizi takip edin.":"Bu platformda henüz gönderi yok.")+'</p>';return;}
     feed.innerHTML=list.map(function(p){
       var n=names[p.platform]||["?","",p.platform];
-      var img=p.gorsel?'<img class="post-img" src="'+esc(p.gorsel)+'" alt="" loading="lazy" referrerpolicy="no-referrer" style="aspect-ratio:1" onerror="this.remove()">':"";
+      var img=p.gorsel?'<img class="post-img" src="'+esc(p.gorsel)+'" alt="" loading="lazy" onerror="this.remove()">':"";
       return '<article class="card post">'+img+'<div class="post-body"><div class="post-top"><span class="pf '+n[1]+'" aria-hidden="true"><svg width="24" height="24" fill="#fff"><use href="#i-'+n[0]+'"/></svg></span><strong>'+n[2]+'</strong><time datetime="'+esc(p.tarih)+'">'+df.format(new Date(p.tarih))+'</time></div><p>'+esc(p.metin)+'</p><div class="post-stats"><span>'+esc(p.etkilesim)+'</span><a href="'+esc(p.link)+'" target="_blank" rel="noopener">Gönderiyi aç</a></div></div></article>';
     }).join("");
   }
