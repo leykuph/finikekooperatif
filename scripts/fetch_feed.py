@@ -58,6 +58,8 @@ def instagram(token):
 
 
 def facebook(page_id, token):
+    who = json.loads(get(f"https://graph.facebook.com/v21.0/{page_id}?fields=name&access_token={token}"))
+    print(f"Facebook hesabı: {who.get('name')}")
     q = urllib.parse.urlencode({
         "fields": "message,created_time,permalink_url,full_picture",
         "limit": LIMIT, "access_token": token,
