@@ -67,11 +67,16 @@ def facebook(page_id, token):
         if not pages:  # sayfa izni verilmemiş: hangi izinlerin olduğunu göster
             perms = json.loads(get(f"https://graph.facebook.com/v21.0/me/permissions?access_token={token}"))["data"]
             print("Facebook: jetonun yönettiği sayfa yok. İzinler:", ", ".join(f"{x['permission']}={x['status']}" for x in perms))
-    if pages:
+    if not pages and page_id != "me":  # iş portföyündeki sayfalar listede çıkmayabilir; kimlikle iste
+        try:
+            pages = [json.loads(get(f"https://graph.facebook.com/v21.0/{page_id}?fields=id,name,link,access_token&access_token={token}"))]
+        except RuntimeError as e:
+            print(f"Facebook: sayfa {page_id} alınamadı: {e}")
+    if pages and pages[0].get("access_token"):
         page = next((p for p in pages if p["id"] == page_id), pages[0])
         page_id, token = page["id"], page["access_token"]
         print(f"Facebook sayfası: {page['name']} · {page.get('link')} · {page_id}")
-    q =urllib.parse.urlencode({
+    q = urllib.parse.urlencode({
         "fields": "message,created_time,permalink_url,full_picture",
         "limit": LIMIT, "access_token": token,
     })
