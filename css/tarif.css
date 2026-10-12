@@ -1,0 +1,24 @@
+/* ---------- Tek tarif sayfası (tarif/*.html, scripts/tarif_sayfalari.py üretir) ---------- */
+.crumbs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:var(--fs-xs);color:var(--muted);margin-bottom:18px}
+.crumbs a{color:inherit}
+.tarif .page-hero h1{max-width:22ch;margin-top:8px}
+.facts{display:flex;flex-wrap:wrap;gap:12px 32px;margin:28px 0 0}
+.facts div{display:grid;gap:2px}
+.facts dt{font:500 var(--fs-xs) var(--font-mono);color:var(--muted)}
+.facts dd{margin:0;font-weight:700}
+.tarif-icerik{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,340px);gap:clamp(28px,5vw,64px);align-items:start;padding-block:clamp(36px,5vw,64px)}
+.tarif-gorsel{order:2;position:sticky;top:calc(env(safe-area-inset-top,0px) + 92px);aspect-ratio:4/5;border-radius:var(--radius)}
+.tarif-metin{display:grid;gap:44px;max-width:70ch}
+.tarif-metin section{display:grid;gap:14px}
+.tarif-metin h2{font-size:clamp(1.5rem,1.2rem + 1vw,2rem)}
+.tarif-metin h3{font-size:var(--fs-md);font-family:var(--font-body);font-weight:700;margin-top:8px}
+.tarif-metin p{margin:0;color:var(--muted)}
+.tarif-metin section:first-child p:first-child{color:var(--ink)}
+.tarif-liste{padding:24px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface)}
+.tarif-liste ul,.tarif-liste ol{margin:0;padding-left:22px;display:grid;gap:10px}
+.tarif-liste ol li::marker{font-family:var(--font-mono);color:var(--orange-ink)}
+#diger-baslik{margin-bottom:32px}
+@media (max-width:860px){
+  .tarif-icerik{grid-template-columns:1fr}
+  .tarif-gorsel{order:0;position:static;aspect-ratio:16/9}
+}
