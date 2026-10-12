@@ -42,6 +42,27 @@
   go(0); restart();
 })();
 
+/* İlk slayttaki portakal çiçekleri (slaytla birlikte kayar): beş beyaz yaprak, ortada sarı başçıklar. Süs amaçlı, ekran okuyuculardan gizli.
+   [x, y, masaüstü boyutu, mobil boyutu, gecikme] */
+(function(){
+  var hero=document.querySelector(".hero"); if(!hero) return;
+  var spots=[[80,18,120,72,.5],[91,40,72,48,.85],[73,38,52,38,1.15],[87,72,96,0,1],[74,80,46,0,1.35]];
+  var petal="M0 -4C-15 -12-15-36 0-44C15-36 15-12 0-4Z", box=document.createElement("div");
+  box.className="blooms"; box.setAttribute("aria-hidden","true");
+  spots.forEach(function(s){
+    var g="";
+    for(var k=0;k<5;k++) g+='<g transform="rotate('+(k*72)+')"><path class="petal" style="--p:'+(k*.09)+'s" d="'+petal+'"/></g>';
+    var h='<g class="heart"><circle r="9" fill="#E8D36A"/>';
+    for(var k=0;k<10;k++){var a=k*36*Math.PI/180, x=(Math.sin(a)*15).toFixed(1), y=(-Math.cos(a)*15).toFixed(1);
+      h+='<line x2="'+x+'" y2="'+y+'" stroke="#F2E6A0" stroke-width="1.6"/><circle cx="'+x+'" cy="'+y+'" r="2.4" fill="#F5B82E"/>';}
+    var b=document.createElement("div"); b.className="bloom";
+    b.style.cssText="--x:"+s[0]+"%;--y:"+s[1]+"%;--s:"+s[2]+"px;--sm:"+s[3]+";--d:"+s[4]+"s";
+    b.innerHTML='<svg viewBox="-50 -50 100 100">'+g+h+'</g></svg>';
+    box.appendChild(b);
+  });
+  var first=hero.querySelector(".slide"); first.insertBefore(box,first.querySelector(".slide-copy"));
+})();
+
 /* Ana sayfa hareketleri. İçerik varsayılan olarak görünür; hareket yalnızca JS çalışırsa ve
    ziyaretçi "hareketi azalt" demediyse eklenir. */
 (function(){

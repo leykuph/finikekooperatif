@@ -44,9 +44,24 @@
   .slide-copy{padding-block:48px 96px}
   .arrows{display:none}
 }
+/* portakal çiçekleri: sayfa açılınca yaprak yaprak açar, sonra hafifçe sallanır (js/index.js) */
+.blooms{position:absolute;inset:0;z-index:1;pointer-events:none;translate:0 calc(var(--hero-py,0px) * -.4)}
+.bloom{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);margin:calc(var(--s) / -2) 0 0 calc(var(--s) / -2);animation:bloom-in 1.5s cubic-bezier(.2,.9,.3,1.15) var(--d) backwards,bloom-sway 5s ease-in-out calc(var(--d) + 1.5s) infinite alternate}
+.bloom svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 12px rgba(10,22,14,.35))}
+.bloom .petal{fill:#FFFDF6;stroke:rgba(120,110,80,.18);stroke-width:1;transform-origin:0 0;animation:petal-open .9s cubic-bezier(.2,.9,.3,1.2) calc(var(--d) + var(--p)) backwards}
+.bloom .heart{transform-origin:0 0;animation:petal-open .6s ease-out calc(var(--d) + .6s) backwards}
+.slide:not(.is-active) .bloom,.slide:not(.is-active) .bloom *{animation:none}
+@keyframes bloom-in{from{transform:scale(.3) rotate(-50deg);opacity:0}}
+@keyframes bloom-sway{from{transform:rotate(-5deg)}to{transform:rotate(6deg) translateY(4px)}}
+@keyframes petal-open{from{transform:scale(.15) rotate(-25deg);opacity:0}}
+@media (max-width:640px){
+  .bloom{--s:calc(var(--sm) * 1px)}
+  .bloom:nth-child(n+4){display:none}
+}
 @media (prefers-reduced-motion:reduce){
   .slides-track,.slide>img,.slide .slide-copy>*{transition:none}
   .slide.is-active>img{transform:scale(1.02)}
+  .bloom,.bloom *{animation:none}
 }
 
 /* ---------- Şerit: elle yazılmış, kayan not bandı ---------- */
